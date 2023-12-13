@@ -1,3 +1,0 @@
-#!C:\Users\M_Hei\Documents\software-engineering-project-time-series-analysis\tseapy-venv\Scripts\python.exe
-from numba.pycc import main
-main()
