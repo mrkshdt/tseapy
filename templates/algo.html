@@ -1,0 +1,36 @@
+{% extends "layouts/layout.html" %}
+
+{% block title %}{{algo}}{% endblock %}
+
+{% block heading %}
+  <h1>{{task }} - {{ algo }}</h1>
+{% endblock %}
+
+{% block content %}
+    <div id="visualization"></div>
+    <div id="interaction">
+      {{ interactionView | safe }}
+    </div>
+    <div id="results"></div>
+{% endblock %}
+
+{% block script %}
+<script>
+    d = {{ graphJSON | safe }};
+    Plotly.newPlot('visualization', d, {});
+
+    function displayFeature() {
+      var f = document.getElementById("features").value;
+      var uri = '{{ algo }}/display-feature?feature='+f;
+      var init = {method: 'get'};
+      fetch( uri, init )
+          .then(response => {console.log(response); return response.json();})
+          .then(update => Plotly.update('visualization', update.data, update.layout, [0]))
+          .catch(err => console.log( 'Fetch Error :-S', err ));
+    };
+
+    {{ interactionScript | safe }}
+
+    {{ parameterScript | safe }}
+</script>
+{% endblock %}

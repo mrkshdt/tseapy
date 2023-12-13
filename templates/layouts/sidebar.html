@@ -1,0 +1,23 @@
+<div class="sticky-top pt-3">
+    {% include 'parameters/features.html' %}
+
+    <!-- parameters -->
+    <form id="parameters" class="d-grid gap-2 nav flex-column">
+        {% for p in parameters %}
+            {% if is_instance(p, BooleanParameter) %}
+                {% include 'parameters/boolean_parameter.html' %}
+            {% elif is_instance(p, NumberParameter) %}
+                {% include 'parameters/number_parameter.html' %}
+            {% elif is_instance(p, RangeParameter) %}
+                {% include 'parameters/range_parameter.html' %}
+            {% elif is_instance(p, ListParameter) %}
+                {% include 'parameters/list_parameter.html' %}
+            {% endif %}
+
+        {% endfor %}
+        {% if parameters %}
+            <button id="do-analysis" onclick="doAnalysis()" type="button" class="btn btn-info mx-2">Analysis</button>
+        {% endif %}
+
+    </form>
+</div>

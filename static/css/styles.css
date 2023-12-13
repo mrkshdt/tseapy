@@ -1,0 +1,78 @@
+.overflow-x-auto {
+    overflow-x: auto;
+}
+
+.overflow-y-hidden {
+    overflow-y: hidden;
+}
+
+.overflow-y-scroll {
+    overflow-y: scroll;
+}
+
+.fs-icon {
+    font-size: 1.5em;
+}
+
+.navbar .navbar-toggler {
+    top: .25rem;
+    right: 1rem;
+}
+
+.full-line-link:hover {
+    background-color: aliceblue;
+}
+
+.border-right-light {
+    border-right: lightgray solid 1px;
+}
+
+/* Small devices (landscape phones, 576px and up) */
+@media (min-width: 576px) {
+    .h-header {
+        height: 64px;
+    }
+    .h-main {
+        height: calc(100vh - 64px);
+    }
+}
+
+/* Medium devices (tablets, 768px and up) */
+@media (min-width: 768px) {
+    .h-header {
+        height: 64px;
+    }
+    .h-main {
+        height: calc(100vh - 64px);
+    }
+}
+
+/* Large devices (desktops, 992px and up) */
+@media (min-width: 992px) {
+    .h-header {
+        height: 64px;
+    }
+    .h-main {
+        height: calc(100vh - 64px);
+    }
+}
+
+/* X-Large devices (large desktops, 1200px and up) */
+@media (min-width: 1200px) {
+    .h-header {
+        height: 64px;
+    }
+    .h-main {
+        height: calc(100vh - 64px);
+    }
+}
+
+/* XX-Large devices (larger desktops, 1400px and up) */
+@media (min-width: 1400px) {
+    .h-header {
+        height: 64px;
+    }
+    .h-main {
+        height: calc(100vh - 64px);
+    }
+}
