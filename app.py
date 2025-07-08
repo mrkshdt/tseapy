@@ -20,6 +20,8 @@ from tseapy.tasks.motif_detection.matrixprofile import Matrixprofile
 from tseapy.tasks.motif_detection.pan_matrixprofile import PanMatrixprofile
 from tseapy.tasks.smoothing import Smoothing
 from tseapy.tasks.smoothing.moving_average import MovingAverage
+from tseapy.tasks.trend_decomposition import TrendDecomposition
+from tseapy.tasks.trend_decomposition.stl import STLDecomposition
 from tseapy.core.parameters import NumberParameter, BooleanParameter, ListParameter, RangeParameter
 
 cache = Cache(
@@ -47,11 +49,15 @@ motif_detection = MotifDetection()
 motif_detection.add_analysis_backend(Matrixprofile())
 motif_detection.add_analysis_backend(PanMatrixprofile())
 
+trend_decomposition = TrendDecomposition()
+trend_decomposition.add_analysis_backend(STLDecomposition())
+
 tasks = TasksList()
 tasks.add_task(pattern_recognition)
 tasks.add_task(change_in_mean)
 tasks.add_task(motif_detection)
 tasks.add_task(smoothing)
+tasks.add_task(trend_decomposition)
 
 def get_data_or_abort() -> pd.DataFrame:
     """Retrieve cached data or abort with HTTP 400."""
