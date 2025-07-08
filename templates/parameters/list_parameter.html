@@ -7,7 +7,7 @@
            onclick="{{p.onclick}}"
            {% if p.disabled %} disabled {% endif %}
     >
-    <datalist id="list_name">
+    <datalist id="list_{{p.name}}">
         {% for v in p.values %}
           <option value="{{ v }}">
         {% endfor %}

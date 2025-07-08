@@ -3,12 +3,12 @@ import secrets
 
 import pandas as pd
 import plotly.utils
-from flask import Flask, render_template, request, session
+from flask import Flask, render_template, request, session, redirect
 from flask_caching import Cache
 
 from tseapy.core.analysis_backends import AnalysisBackend
 from tseapy.core.tasks import Task, TasksList
-from tseapy.data.examples import get_air_quality_uci
+from tseapy.core.validation import validate_dataframe
 from tseapy.tasks import motif_detection
 from tseapy.tasks.change_in_mean import ChangeInMean
 from tseapy.tasks.change_in_mean.pelt_l2 import PeltL2
@@ -74,13 +74,30 @@ def render_algo_template(t: Task, a: AnalysisBackend):
     return html
 
 
+@app.route('/upload-data', methods=['GET', 'POST'])
+def upload_data():
+    if request.method == 'POST':
+        file = request.files.get('file')
+        if file is None or file.filename == '':
+            return render_template('upload.html', error='No file selected'), 400
+        try:
+            df = pd.read_csv(file, sep=None, engine='python', parse_dates=[0])
+            df = df.set_index(df.columns[0])
+            df = df.dropna(axis=1, how='all').dropna(axis=0, how='all').select_dtypes(include='number')
+            validate_dataframe(df)
+        except Exception as e:
+            return render_template('upload.html', error='Invalid file structure'), 400
+        cache.set('data', df)
+        session['feature_to_display'] = df.columns[0]
+        return redirect('/')
+    return render_template('upload.html')
+
+
 # create index page function
 @app.route('/')
 def index():
-    # TODO create a menu + route for setting up data!
-    data = get_air_quality_uci()[:1000]
-    cache.set("data", data)
-    session['feature_to_display'] = data.columns[0]
+    if cache.get("data") is None:
+        return redirect('/upload-data')
     html = render_template(
         'index.html',
         tasks=[(t.name, t.short_description) for t in tasks._tasks.values()],
