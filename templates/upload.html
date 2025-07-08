@@ -1,0 +1,20 @@
+{% extends "layouts/layout_without_sidebar.html" %}
+
+{% block title %}Upload Data{% endblock %}
+
+{% block heading %}
+  <h1>Upload Data</h1>
+{% endblock %}
+
+{% block content %}
+  {% if error %}
+    <div class="alert alert-danger" role="alert">{{ error }}</div>
+  {% endif %}
+  <form action="/upload-data" method="post" enctype="multipart/form-data">
+    <div class="mb-3">
+      <label for="file" class="form-label">CSV File</label>
+      <input class="form-control" type="file" id="file" name="file">
+    </div>
+    <button type="submit" class="btn btn-primary">Upload</button>
+  </form>
+{% endblock %}
