@@ -18,6 +18,8 @@ from tseapy.tasks.pattern_recognition.mass import Mass
 from tseapy.tasks.motif_detection import MotifDetection
 from tseapy.tasks.motif_detection.matrixprofile import Matrixprofile
 from tseapy.tasks.motif_detection.pan_matrixprofile import PanMatrixprofile
+from tseapy.tasks.smoothing import Smoothing
+from tseapy.tasks.smoothing.moving_average import MovingAverage
 from tseapy.core.parameters import NumberParameter, BooleanParameter, ListParameter, RangeParameter
 
 cache = Cache(
@@ -38,6 +40,9 @@ change_in_mean = ChangeInMean()
 change_in_mean.add_analysis_backend(PeltL2())
 change_in_mean.add_analysis_backend(SlidingWindowL2())
 
+smoothing = Smoothing()
+smoothing.add_analysis_backend(MovingAverage())
+
 motif_detection = MotifDetection()
 motif_detection.add_analysis_backend(Matrixprofile())
 motif_detection.add_analysis_backend(PanMatrixprofile())
@@ -46,6 +51,7 @@ tasks = TasksList()
 tasks.add_task(pattern_recognition)
 tasks.add_task(change_in_mean)
 tasks.add_task(motif_detection)
+tasks.add_task(smoothing)
 
 def get_feature_to_display():
     return session.get('feature_to_display', cache.get('data').columns[0])
