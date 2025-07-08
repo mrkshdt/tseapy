@@ -3,7 +3,7 @@ import secrets
 
 import pandas as pd
 import plotly.utils
-from flask import Flask, render_template, request, session
+from flask import Flask, render_template, request, session, abort, jsonify
 from flask_caching import Cache
 
 from tseapy.core.analysis_backends import AnalysisBackend
@@ -47,15 +47,23 @@ tasks.add_task(pattern_recognition)
 tasks.add_task(change_in_mean)
 tasks.add_task(motif_detection)
 
+def get_data_or_abort() -> pd.DataFrame:
+    """Retrieve cached data or abort with HTTP 400."""
+    data = cache.get('data')
+    if data is None:
+        abort(400, description='No dataset loaded. Please load data first.')
+    return data
+
 def get_feature_to_display():
-    return session.get('feature_to_display', cache.get('data').columns[0])
+    data = get_data_or_abort()
+    return session.get('feature_to_display', data.columns[0])
 
 
 def render_algo_template(t: Task, a: AnalysisBackend):
     """
     Utility function to render a specific algorithm template
     """
-    data: pd.DataFrame = cache.get('data')
+    data: pd.DataFrame = get_data_or_abort()
     data_view = t.get_visualization_view(data=data, feature_to_display=get_feature_to_display())
     interaction_script = t.get_interaction_script(algo=a.name)
     interaction_view = t.get_interaction_view(algo=a.name)
@@ -111,10 +119,33 @@ def display_algo(task, algo):
     return html
 
 
+def _expected_params(backend: AnalysisBackend):
+    params = [p.name for p in backend.parameters]
+    callback = backend.callback_url.strip("'")
+    if 'compute?' in callback:
+        query = callback.split('compute?')[1]
+        if query:
+            for part in query.split('&'):
+                if part:
+                    name = part.split('=')[0]
+                    if name and name not in params:
+                        params.append(name)
+    return params
+
+
 @app.route('/<task>/<algo>/compute', methods=['GET'])
 def perform_analysis(task, algo):
     t: Task = tasks.get_tasks(task)
-    fig = t.get_analysis_results(data=cache.get('data'), feature=get_feature_to_display(), algo=algo,
+    backend = t.analysis_backend_factory.get_analysis_backend(algo)
+    data = get_data_or_abort()
+    expected = _expected_params(backend)
+    missing = [p for p in expected if p not in request.args]
+    if missing:
+        abort(400, description=f"Missing query parameter(s): {', '.join(missing)}")
+    feature = request.args.get('feature', get_feature_to_display())
+    if feature not in data.columns:
+        abort(400, description='Unknown feature column')
+    fig = t.get_analysis_results(data=data, feature=feature, algo=algo,
                                  **request.args)
 
     response = app.response_class(
@@ -129,10 +160,13 @@ def perform_analysis(task, algo):
 def display_feature(task, algo):
     t: Task = tasks.get_tasks(task)
     a: AnalysisBackend = t.analysis_backend_factory.get_analysis_backend(algo)
-    data: pd.DataFrame = cache.get('data')
+    data: pd.DataFrame = get_data_or_abort()
 
     feature_to_display: str = request.args.get('feature')
-    assert feature_to_display in data.columns
+    if feature_to_display is None:
+        abort(400, description='Parameter "feature" is required')
+    if feature_to_display not in data.columns:
+        abort(400, description='Unknown feature column')
     session['feature_to_display'] = feature_to_display
 
     response = app.response_class(
@@ -177,6 +211,11 @@ def utility_processor():
                 NumberParameter=NumberParameter,
                 RangeParameter=RangeParameter,
                 ListParameter=ListParameter)
+
+
+@app.errorhandler(400)
+def bad_request(error):
+    return jsonify({'error': error.description}), 400
 
 if __name__ == "__main__":
     app.run(debug=True)
