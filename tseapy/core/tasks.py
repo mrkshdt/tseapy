@@ -1,8 +1,5 @@
 import abc
 
-import pandas as pd
-from plotly import express as px
-
 from tseapy.core.analysis_backends import AnalysisBackendsList, AnalysisBackend
 
 
@@ -18,8 +15,14 @@ class Task:
         self.analysis_backend_factory = AnalysisBackendsList()
 
     @staticmethod
-    def get_visualization_view(data: pd.DataFrame, feature_to_display: str):
-        # Create figure
+    def get_visualization_view(data, feature_to_display: str):
+        """Return a Plotly line plot for the given feature."""
+        import pandas as pd  # Local import to avoid hard dependency for tests
+        from plotly import express as px
+
+        if not isinstance(data, pd.DataFrame):
+            raise TypeError('data must be a pandas.DataFrame')
+
         fig = px.line(x=data.index, y=data[feature_to_display], markers=True)
         fig.update_yaxes(title={'text': feature_to_display})
         return fig
