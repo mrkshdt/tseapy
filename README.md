@@ -60,5 +60,5 @@ To launch tseapy:
 - **templates/**: Houses HTML templates for the web interface.
 - **static/**: Contains static files like CSS for styling.
 - **tests/**: Includes unit tests to ensure the reliability and efficiency of the application.
-
 Embark on your time series analysis journey with **tseapy** – your go-to tool for insightful and interactive data exploration!
+For more ideas on extending tseapy, see [docs/PROPOSED_TASKS.md](docs/PROPOSED_TASKS.md).
