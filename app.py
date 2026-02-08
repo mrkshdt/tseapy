@@ -21,6 +21,10 @@ from tseapy.tasks.motif_detection.matrixprofile import Matrixprofile
 from tseapy.tasks.motif_detection.pan_matrixprofile import PanMatrixprofile
 from tseapy.tasks.smoothing import Smoothing
 from tseapy.tasks.smoothing.moving_average import MovingAverage
+from tseapy.tasks.forecasting import Forecasting
+from tseapy.tasks.forecasting.auto_arima import AutoArimaBackend
+from tseapy.tasks.forecasting.auto_ets import AutoEtsBackend
+from tseapy.tasks.forecasting.auto_theta import AutoThetaBackend
 from tseapy.core.parameters import NumberParameter, BooleanParameter, ListParameter, RangeParameter
 
 cache = Cache(
@@ -49,11 +53,17 @@ motif_detection = MotifDetection()
 motif_detection.add_analysis_backend(Matrixprofile())
 motif_detection.add_analysis_backend(PanMatrixprofile())
 
+forecasting = Forecasting()
+forecasting.add_analysis_backend(AutoArimaBackend())
+forecasting.add_analysis_backend(AutoEtsBackend())
+forecasting.add_analysis_backend(AutoThetaBackend())
+
 tasks = TasksList()
 tasks.add_task(pattern_recognition)
 tasks.add_task(change_in_mean)
 tasks.add_task(motif_detection)
 tasks.add_task(smoothing)
+tasks.add_task(forecasting)
 
 ALLOWED_EXTENSIONS = {"csv"}
 UPLOAD_STEPS = ("upload", "preview", "configure", "analysis")

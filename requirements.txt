@@ -6,4 +6,5 @@ plotly==5.24.1
 ruptures==1.1.9
 scikit-learn==1.7.1
 stumpy==1.13.0
+statsforecast==2.0.3
 charset-normalizer==3.4.1
