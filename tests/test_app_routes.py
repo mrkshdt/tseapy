@@ -25,6 +25,23 @@ def test_upload_page_available():
         assert b'Upload CSV' in resp.data
 
 
+def test_index_lists_new_tasks():
+    with app.test_client() as client:
+        reset_cache_state()
+        cache.set('data', pd.DataFrame({'f': [1, 2, 3]}, index=pd.date_range('2020-01-01', periods=3, freq='D')))
+        resp = client.get('/')
+        assert resp.status_code == 200
+        assert b'decomposition' in resp.data
+        assert b'frequency-analysis' in resp.data
+
+
+def test_new_task_pages_available():
+    with app.test_client() as client:
+        reset_cache_state()
+        assert client.get('/decomposition').status_code == 200
+        assert client.get('/frequency-analysis').status_code == 200
+
+
 def test_upload_rejects_non_csv():
     with app.test_client() as client:
         reset_cache_state()
