@@ -1,6 +1,5 @@
 import stumpy
 from sklearn.preprocessing import minmax_scale
-import pandas as pd
 import numpy as np
 
 import plotly.express as px
@@ -49,37 +48,34 @@ class Matrixprofile(MotifDetectionBackend):
     def do_analysis(self, data, feature, **kwargs):
         penalty = float(kwargs['penalty'])
         width = int(kwargs['width'])
-        algo = stumpy.stump(data[feature],width)
+        series = data[feature].astype(np.float64)
+        if len(series) < 4:
+            raise ValueError("Dataset is too short for motif detection. Need at least 4 rows.")
+        width = max(3, min(width, len(series) - 1))
 
-        mp = [x[0] for x in algo]
-        profile = minmax_scale(mp, feature_range=[0,1])
+        algo = stumpy.stump(series, width)
+
+        mp = np.asarray([x[0] for x in algo], dtype=np.float64)
+        finite_mask = np.isfinite(mp)
+        if finite_mask.any():
+            fill_value = np.max(mp[finite_mask])
+            safe_mp = np.where(finite_mask, mp, fill_value)
+            profile = minmax_scale(safe_mp, feature_range=(0, 1))
+        else:
+            profile = np.zeros_like(mp)
 
         motifs = [True if x <= penalty else False for x in profile]
         
-        # Very unprecise solution
-        tmp = data
-        nan_list = [np.nan for x in data.iterrows()]
-        nan_df = pd.DataFrame(nan_list)
-        tmp['motif'] = nan_df
-        tmp['normal'] = nan_df
+        tmp = data.copy()
+        motif_mask = np.zeros(len(tmp), dtype=bool)
+        for j, is_motif in enumerate(motifs):
+            if is_motif:
+                end = min(j + width, len(tmp))
+                motif_mask[j:end] = True
 
-        for j, i in enumerate(motifs):
-            if i==True:
-                try:
-                    tmp['motif'].iloc[j:j+width]=data[feature].iloc[j:j+width]
-                    tmp['normal'].iloc[j:j+width]=np.nan
-
-                except:
-                    tmp['motif'].iloc[j:]=data[feature].iloc[j:]
-                    tmp['normal'].iloc[j:]=np.nan
-            else:
-                try:
-                    tmp['motif'].iloc[j:j+width]=np.nan
-                    tmp['normal'].iloc[j:j+width]=data[feature].iloc[j:j+width]
-
-                except:
-                    tmp['motif'].iloc[j:j+width]=np.nan
-                    tmp['normal'].iloc[j:j+width]=data[feature].iloc[j:]
+        values = tmp[feature].astype(np.float64)
+        tmp["motif"] = np.where(motif_mask, values, np.nan)
+        tmp["normal"] = np.where(motif_mask, np.nan, values)
 
 
         

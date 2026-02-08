@@ -12,14 +12,14 @@ This roadmap delivers the Upload Milestone: a multi-step data wizard that lets u
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Infrastructure Upgrade** - Upgrade all dependencies to current stable versions and verify the existing test suite passes
-- [ ] **Phase 2: Upload Form and File Validation** - Add the CSV file upload route with security hardening (file type whitelist, size limit, path sanitization)
-- [ ] **Phase 3: CSV Parsing Utility** - Build the delimiter-sniffing CSV parser with encoding detection and demo dataset support
-- [ ] **Phase 4: Data Preview UI** - Render first-10-rows preview table with column type indicators and dataset summary stats
-- [ ] **Phase 5: Column Selection UI** - Let user choose the time index and value columns with confirmation before proceeding
-- [ ] **Phase 6: Error Handling and Validation** - Add specific error messages for parse failures, missing values, and invalid datetime columns
-- [ ] **Phase 7: Pipeline Integration** - Wire wizard output into the existing analysis pipeline via the two-phase cache handoff
-- [ ] **Phase 8: UI Consistency** - Ensure all wizard pages match existing app styling and navigation feels intuitive end-to-end
+- [x] **Phase 1: Infrastructure Upgrade** - Upgrade all dependencies to current stable versions and verify the existing test suite passes
+- [x] **Phase 2: Upload Form and File Validation** - Add the CSV file upload route with security hardening (file type whitelist, size limit, path sanitization)
+- [x] **Phase 3: CSV Parsing Utility** - Build the delimiter-sniffing CSV parser with encoding detection and demo dataset support
+- [x] **Phase 4: Data Preview UI** - Render first-10-rows preview table with column type indicators and dataset summary stats
+- [x] **Phase 5: Column Selection UI** - Let user choose the time index and value columns with confirmation before proceeding
+- [x] **Phase 6: Error Handling and Validation** - Add specific error messages for parse failures, missing values, and invalid datetime columns
+- [x] **Phase 7: Pipeline Integration** - Wire wizard output into the existing analysis pipeline via the two-phase cache handoff
+- [x] **Phase 8: UI Consistency** - Ensure all wizard pages match existing app styling and navigation feels intuitive end-to-end
 
 ## Phase Details
 
@@ -31,13 +31,13 @@ Decimal phases appear between their surrounding integers in numeric order.
   1. App starts and all four existing analysis tasks work after running `pip install -r requirements.txt`
   2. Bootstrap 5.3.x CDN link is active and all existing UI components render correctly
   3. Existing test suite passes with zero failures on the upgraded stack
-  4. `requirements.txt` pins Flask 3.x, pandas 2.x, numpy 1.26.x, and scikit-learn 1.4.x
+  4. `requirements.txt` pins Flask 3.x, pandas 2.x, numpy 2.x, and scikit-learn 1.7.x (Python 3.13 compatible)
 **Plans**: TBD
 
 Plans:
-- [ ] 01-01: Audit current dependency versions and research exact stable pins (Flask, pandas, numpy, scikit-learn, stumpy compatibility)
-- [ ] 01-02: Update requirements.txt with pinned versions and update Bootstrap CDN link in base template
-- [ ] 01-03: Run existing tests against upgraded stack and fix any regressions
+- [x] 01-01: Audit current dependency versions and research exact stable pins (Flask, pandas, numpy, scikit-learn, stumpy compatibility)
+- [x] 01-02: Update requirements.txt with pinned versions and update Bootstrap CDN link in base template
+- [x] 01-03: Run existing tests against upgraded stack and fix any regressions
 
 ### Phase 2: Upload Form and File Validation
 **Goal**: User can submit a CSV file through a form and the app safely stores it, rejecting invalid files before any parsing occurs
@@ -51,9 +51,9 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 02-01: Create upload route (POST /upload) with Werkzeug secure_filename, extension whitelist, and MAX_CONTENT_LENGTH enforcement
-- [ ] 02-02: Create upload.html template with file picker form, error display area, and Bootstrap styling
-- [ ] 02-03: Add 413 RequestEntityTooLarge handler and non-CSV rejection response
+- [x] 02-01: Create upload route (POST /upload) with Werkzeug secure_filename, extension whitelist, and MAX_CONTENT_LENGTH enforcement
+- [x] 02-02: Create upload.html template with file picker form, error display area, and Bootstrap styling
+- [x] 02-03: Add 413 RequestEntityTooLarge handler and non-CSV rejection response
 
 ### Phase 3: CSV Parsing Utility
 **Goal**: Uploaded CSV files are reliably parsed regardless of delimiter or encoding, and the original demo dataset remains accessible
@@ -66,9 +66,9 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 03-01: Build tseapy/data/upload.py — thin pandas read_csv wrapper with sep=None/engine='python', encoding detection via charset-normalizer, and on_bad_lines='skip'
-- [ ] 03-02: Add demo dataset route/button that loads existing Air Quality UCI data into cache['raw_data']
-- [ ] 03-03: Wire upload route to call CSV parser and store result in cache['raw_data'], then redirect to preview
+- [x] 03-01: Build tseapy/data/upload.py — thin pandas read_csv wrapper with sep=None/engine='python', encoding detection via charset-normalizer, and on_bad_lines='skip'
+- [x] 03-02: Add demo dataset route/button that loads existing Air Quality UCI data into cache['raw_data']
+- [x] 03-03: Wire upload route to call CSV parser and store result in cache['raw_data'], then redirect to preview
 
 ### Phase 4: Data Preview UI
 **Goal**: After upload, user can see their data and understand its shape before selecting columns
@@ -81,10 +81,10 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 04-01: Create GET /upload/preview route that reads cache['raw_data'] and renders preview
-- [ ] 04-02: Build upload_preview.html template with DataFrame.to_html() table and Bootstrap table classes
-- [ ] 04-03: Add column type inference logic (numeric/date/text) and render type badges next to column headers
-- [ ] 04-04: Add summary bar showing row count and date range below the preview table
+- [x] 04-01: Create GET /upload/preview route that reads cache['raw_data'] and renders preview
+- [x] 04-02: Build upload_preview.html template with DataFrame.to_html() table and Bootstrap table classes
+- [x] 04-03: Add column type inference logic (numeric/date/text) and render type badges next to column headers
+- [x] 04-04: Add summary bar showing row count and date range below the preview table
 
 ### Phase 5: Column Selection UI
 **Goal**: User can explicitly choose which column is the time index and which column contains the values to analyze
@@ -97,9 +97,9 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 05-01: Add time index column dropdown to preview/configure template, populated from DataFrame columns
-- [ ] 05-02: Add value column dropdown filtered to numeric columns only
-- [ ] 05-03: Add confirmation summary section that displays selections and requires explicit confirmation
+- [x] 05-01: Add time index column dropdown to preview/configure template, populated from DataFrame columns
+- [x] 05-02: Add value column dropdown filtered to numeric columns only
+- [x] 05-03: Add confirmation summary section that displays selections and requires explicit confirmation
 
 ### Phase 6: Error Handling and Validation
 **Goal**: Common CSV problems surface as actionable error messages rather than crashes or silent bad data
@@ -112,9 +112,9 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 06-01: Add specific exception handlers for pandas ParserError, UnicodeDecodeError, and MemoryError with user-friendly messages
-- [ ] 06-02: Implement NaN row dropping in the configure step and surface the removed-row count to the user
-- [ ] 06-03: Add datetime parse validation for the selected time index column with clear error on failure
+- [x] 06-01: Add specific exception handlers for pandas ParserError, UnicodeDecodeError, and MemoryError with user-friendly messages
+- [x] 06-02: Implement NaN row dropping in the configure step and surface the removed-row count to the user
+- [x] 06-03: Add datetime parse validation for the selected time index column with clear error on failure
 
 ### Phase 7: Pipeline Integration
 **Goal**: After column selection, the existing analysis pipeline works with user-uploaded data exactly as it did with the hardcoded demo
@@ -127,9 +127,9 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 07-01: Create POST /upload/configure route that re-indexes DataFrame with datetime index and writes to cache['data'] and session['feature_to_display']
-- [ ] 07-02: Modify GET / index route to check cache.get('data') and redirect to /upload when no data is present
-- [ ] 07-03: Test full end-to-end flow: upload CSV -> preview -> configure -> run each analysis task -> view results
+- [x] 07-01: Create POST /upload/configure route that re-indexes DataFrame with datetime index and writes to cache['data'] and session['feature_to_display']
+- [x] 07-02: Modify GET / index route to check cache.get('data') and redirect to /upload when no data is present
+- [x] 07-03: Test full end-to-end flow: upload CSV -> preview -> configure -> run each analysis task -> view results
 
 ### Phase 8: UI Consistency
 **Goal**: The wizard pages feel like part of the same app as the existing analysis pages — no jarring style shifts
@@ -141,8 +141,8 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 08-01: Audit upload/preview/configure templates against existing templates for layout, nav, and CSS class consistency
-- [ ] 08-02: Add breadcrumb or step indicator showing wizard progress (Upload -> Preview -> Configure -> Analysis)
+- [x] 08-01: Audit upload/preview/configure templates against existing templates for layout, nav, and CSS class consistency
+- [x] 08-02: Add breadcrumb or step indicator showing wizard progress (Upload -> Preview -> Configure -> Analysis)
 
 ## Progress
 
@@ -151,11 +151,11 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Infrastructure Upgrade | 0/3 | Not started | - |
-| 2. Upload Form and File Validation | 0/3 | Not started | - |
-| 3. CSV Parsing Utility | 0/3 | Not started | - |
-| 4. Data Preview UI | 0/4 | Not started | - |
-| 5. Column Selection UI | 0/3 | Not started | - |
-| 6. Error Handling and Validation | 0/3 | Not started | - |
-| 7. Pipeline Integration | 0/3 | Not started | - |
-| 8. UI Consistency | 0/2 | Not started | - |
+| 1. Infrastructure Upgrade | 3/3 | Complete | 2026-02-08 |
+| 2. Upload Form and File Validation | 3/3 | Complete | 2026-02-08 |
+| 3. CSV Parsing Utility | 3/3 | Complete | 2026-02-08 |
+| 4. Data Preview UI | 4/4 | Complete | 2026-02-08 |
+| 5. Column Selection UI | 3/3 | Complete | 2026-02-08 |
+| 6. Error Handling and Validation | 3/3 | Complete | 2026-02-08 |
+| 7. Pipeline Integration | 3/3 | Complete | 2026-02-08 |
+| 8. UI Consistency | 2/2 | Complete | 2026-02-08 |

@@ -43,23 +43,8 @@ class TestTask(TestCase):
                 parameters=[]
             )
         )
-        expected_javascript = """
-        function doAnalysis() {
-            var url = '/task/algo/compute?param1='+param1+'&param2='+param2;
-            for (let e of document.getElementById('parameters').elements) { 
-                if (e.tagName == 'INPUT') {
-                    if (e.type == 'checkbox') {
-                        url += '&' + e.id +'=' + e.checked;
-                    } else {
-                        url += '&' + e.id +'=' + e.value;
-                    }
-                }
-            } 
-            fetch(url, {method: 'GET'})
-                    .then(response => response.json())
-                    .then(resultsPlot => Plotly.newPlot('results', resultsPlot, {}));  
-        }
-        """
         actual_javascript = task.get_parameter_script('algo')
-        self.assertEqual(expected_javascript, actual_javascript)
-
+        self.assertIn("var url = '/task/algo/compute?param1='+param1+'&param2='+param2;", actual_javascript)
+        self.assertIn("fetch(url, {method: 'GET'})", actual_javascript)
+        self.assertIn("Plotly.newPlot(resultsDiv, data, layout, config);", actual_javascript)
+        self.assertIn("Plotly.react(resultsDiv, data, layout, config);", actual_javascript)

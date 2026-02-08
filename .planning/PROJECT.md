@@ -27,14 +27,14 @@ Users can upload their own CSV data and immediately analyze any time series colu
 
 <!-- Current scope. Building toward these. -->
 
-- [ ] User can upload a CSV file through a data wizard UI
-- [ ] Data wizard shows a preview of the uploaded CSV (first N rows)
-- [ ] User can select which column is the time/date index
-- [ ] User can select which column contains the values to analyze
-- [ ] Uploaded data replaces the hardcoded demo dataset in the analysis pipeline
-- [ ] User can navigate from data upload → column selection → task selection → algorithm → results
-- [ ] UI is clean, functional, and consistent across all pages
-- [ ] App handles common CSV issues gracefully (missing values, wrong delimiters, non-numeric columns)
+- [x] User can upload a CSV file through a data wizard UI
+- [x] Data wizard shows a preview of the uploaded CSV (first N rows)
+- [x] User can select which column is the time/date index
+- [x] User can select which column contains the values to analyze
+- [x] Uploaded data replaces the hardcoded demo dataset in the analysis pipeline
+- [x] User can navigate from data upload → column selection → task selection → algorithm → results
+- [x] UI is clean, functional, and consistent across all pages
+- [x] App handles common CSV issues gracefully (missing values, wrong delimiters, non-numeric columns)
 
 ### Out of Scope
 
@@ -68,10 +68,10 @@ Users can upload their own CSV data and immediately analyze any time series colu
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Keep Flask + server-rendered HTML | Fastest path to working version, existing code already works this way | — Pending |
-| One column at a time analysis | Simplest UX, matches existing architecture | — Pending |
-| Flexible CSV format (user picks columns) | Real-world CSVs are messy, auto-detection is fragile | — Pending |
-| No database / no auth for v1 | Keep scope minimal for first working version | — Pending |
+| Keep Flask + server-rendered HTML | Fastest path to working version, existing code already works this way | Implemented |
+| One column at a time analysis | Simplest UX, matches existing architecture | Implemented |
+| Flexible CSV format (user picks columns) | Real-world CSVs are messy, auto-detection is fragile | Implemented |
+| No database / no auth for v1 | Keep scope minimal for first working version | Implemented |
 
 ---
-*Last updated: 2026-02-08 after initialization*
+*Last updated: 2026-02-08 after milestone completion*

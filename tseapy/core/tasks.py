@@ -48,6 +48,14 @@ class Task:
         url = a.callback_url
         script = """
         function doAnalysis() {
+            if (typeof window.validateAnalysisRequest === 'function') {
+                const validationMessage = window.validateAnalysisRequest();
+                if (validationMessage) {
+                    const resultsDiv = document.getElementById('results');
+                    resultsDiv.innerHTML = '<div class="alert alert-warning mt-3" role="alert">' + validationMessage + '</div>';
+                    return;
+                }
+            }
             var url = """ + url + """;
             for (let e of document.getElementById('parameters').elements) { 
                 if (e.tagName == 'INPUT') {
@@ -59,8 +67,29 @@ class Task:
                 }
             } 
             fetch(url, {method: 'GET'})
-                    .then(response => response.json())
-                    .then(resultsPlot => Plotly.newPlot('results', resultsPlot, {}));  
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.json().then(err => {
+                                throw new Error(err.error || 'Analysis failed');
+                            });
+                        }
+                        return response.json();
+                    })
+                    .then(resultsPlot => {
+                        const resultsDiv = document.getElementById('results');
+                        const data = resultsPlot.data || [];
+                        const layout = resultsPlot.layout || {};
+                        const config = {};
+                        if (resultsDiv.classList.contains('js-plotly-plot')) {
+                            Plotly.react(resultsDiv, data, layout, config);
+                        } else {
+                            Plotly.newPlot(resultsDiv, data, layout, config);
+                        }
+                    })
+                    .catch(err => {
+                        const resultsDiv = document.getElementById('results');
+                        resultsDiv.innerHTML = '<div class="alert alert-danger mt-3" role="alert">' + err.message + '</div>';
+                    });  
         }
         """
         return script

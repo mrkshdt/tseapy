@@ -9,46 +9,46 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Data Upload
 
-- [ ] **UPLD-01**: User can upload a CSV file via a file picker form
-- [ ] **UPLD-02**: App auto-detects CSV delimiter (comma, semicolon, tab)
-- [ ] **UPLD-03**: App rejects non-CSV files with a clear error message
-- [ ] **UPLD-04**: App enforces a file size limit and shows a friendly message when exceeded
-- [ ] **UPLD-05**: User can load a demo dataset instead of uploading a file
+- [x] **UPLD-01**: User can upload a CSV file via a file picker form
+- [x] **UPLD-02**: App auto-detects CSV delimiter (comma, semicolon, tab)
+- [x] **UPLD-03**: App rejects non-CSV files with a clear error message
+- [x] **UPLD-04**: App enforces a file size limit and shows a friendly message when exceeded
+- [x] **UPLD-05**: User can load a demo dataset instead of uploading a file
 
 ### Data Preview
 
-- [ ] **PREV-01**: User sees a preview table of the first 10 rows after upload
-- [ ] **PREV-02**: User sees column type indicators (numeric, text, date) next to each column
-- [ ] **PREV-03**: User sees a summary: row count and date range of the loaded data
+- [x] **PREV-01**: User sees a preview table of the first 10 rows after upload
+- [x] **PREV-02**: User sees column type indicators (numeric, text, date) next to each column
+- [x] **PREV-03**: User sees a summary: row count and date range of the loaded data
 
 ### Column Selection
 
-- [ ] **COLS-01**: User can select which column is the time/date index from a dropdown
-- [ ] **COLS-02**: User can select which column contains values to analyze (filtered to numeric only)
-- [ ] **COLS-03**: User sees a confirmation summary of their selections before proceeding
+- [x] **COLS-01**: User can select which column is the time/date index from a dropdown
+- [x] **COLS-02**: User can select which column contains values to analyze (filtered to numeric only)
+- [x] **COLS-03**: User sees a confirmation summary of their selections before proceeding
 
 ### Error Handling
 
-- [ ] **ERRH-01**: App shows clear error messages for parse failures (encoding issues, malformed rows)
-- [ ] **ERRH-02**: App handles missing values by dropping NaN rows and informing the user how many were removed
-- [ ] **ERRH-03**: App validates the selected time column parses as datetime
+- [x] **ERRH-01**: App shows clear error messages for parse failures (encoding issues, malformed rows)
+- [x] **ERRH-02**: App handles missing values by dropping NaN rows and informing the user how many were removed
+- [x] **ERRH-03**: App validates the selected time column parses as datetime
 
 ### Pipeline Integration
 
-- [ ] **PIPE-01**: After column selection, data is cached and the existing analysis pipeline works unchanged
-- [ ] **PIPE-02**: The index page redirects to the upload wizard when no data is loaded
-- [ ] **PIPE-03**: User can navigate from data upload through to analysis results end-to-end
+- [x] **PIPE-01**: After column selection, data is cached and the existing analysis pipeline works unchanged
+- [x] **PIPE-02**: The index page redirects to the upload wizard when no data is loaded
+- [x] **PIPE-03**: User can navigate from data upload through to analysis results end-to-end
 
 ### Infrastructure
 
-- [ ] **INFR-01**: Dependencies upgraded (Flask 3.x, pandas 2.x, numpy 1.26.x, scikit-learn 1.4.x)
-- [ ] **INFR-02**: Bootstrap CDN updated to 5.3.x
-- [ ] **INFR-03**: Existing tests pass after dependency upgrade
+- [x] **INFR-01**: Dependencies upgraded (Flask 3.x, pandas 2.x, numpy 2.x, scikit-learn 1.7.x for Python 3.13)
+- [x] **INFR-02**: Bootstrap CDN updated to 5.3.x
+- [x] **INFR-03**: Existing tests pass after dependency upgrade
 
 ### UI Consistency
 
-- [ ] **UICN-01**: Upload and wizard pages use the same layout/styling as existing pages
-- [ ] **UICN-02**: Navigation between wizard steps and analysis pages is intuitive
+- [x] **UICN-01**: Upload and wizard pages use the same layout/styling as existing pages
+- [x] **UICN-02**: Navigation between wizard steps and analysis pages is intuitive
 
 ## v2 Requirements
 
@@ -93,28 +93,28 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| UPLD-01 | Phase 2 | Pending |
-| UPLD-02 | Phase 3 | Pending |
-| UPLD-03 | Phase 2 | Pending |
-| UPLD-04 | Phase 2 | Pending |
-| UPLD-05 | Phase 3 | Pending |
-| PREV-01 | Phase 4 | Pending |
-| PREV-02 | Phase 4 | Pending |
-| PREV-03 | Phase 4 | Pending |
-| COLS-01 | Phase 5 | Pending |
-| COLS-02 | Phase 5 | Pending |
-| COLS-03 | Phase 5 | Pending |
-| ERRH-01 | Phase 6 | Pending |
-| ERRH-02 | Phase 6 | Pending |
-| ERRH-03 | Phase 6 | Pending |
-| PIPE-01 | Phase 7 | Pending |
-| PIPE-02 | Phase 7 | Pending |
-| PIPE-03 | Phase 7 | Pending |
-| INFR-01 | Phase 1 | Pending |
-| INFR-02 | Phase 1 | Pending |
-| INFR-03 | Phase 1 | Pending |
-| UICN-01 | Phase 8 | Pending |
-| UICN-02 | Phase 8 | Pending |
+| UPLD-01 | Phase 2 | Completed |
+| UPLD-02 | Phase 3 | Completed |
+| UPLD-03 | Phase 2 | Completed |
+| UPLD-04 | Phase 2 | Completed |
+| UPLD-05 | Phase 3 | Completed |
+| PREV-01 | Phase 4 | Completed |
+| PREV-02 | Phase 4 | Completed |
+| PREV-03 | Phase 4 | Completed |
+| COLS-01 | Phase 5 | Completed |
+| COLS-02 | Phase 5 | Completed |
+| COLS-03 | Phase 5 | Completed |
+| ERRH-01 | Phase 6 | Completed |
+| ERRH-02 | Phase 6 | Completed |
+| ERRH-03 | Phase 6 | Completed |
+| PIPE-01 | Phase 7 | Completed |
+| PIPE-02 | Phase 7 | Completed |
+| PIPE-03 | Phase 7 | Completed |
+| INFR-01 | Phase 1 | Completed |
+| INFR-02 | Phase 1 | Completed |
+| INFR-03 | Phase 1 | Completed |
+| UICN-01 | Phase 8 | Completed |
+| UICN-02 | Phase 8 | Completed |
 
 **Coverage:**
 - v1 requirements: 22 total
@@ -123,4 +123,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-02-08*
-*Last updated: 2026-02-08 after roadmap creation*
+*Last updated: 2026-02-08 after milestone completion*
