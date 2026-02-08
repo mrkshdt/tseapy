@@ -93,34 +93,34 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| UPLD-01 | TBD | Pending |
-| UPLD-02 | TBD | Pending |
-| UPLD-03 | TBD | Pending |
-| UPLD-04 | TBD | Pending |
-| UPLD-05 | TBD | Pending |
-| PREV-01 | TBD | Pending |
-| PREV-02 | TBD | Pending |
-| PREV-03 | TBD | Pending |
-| COLS-01 | TBD | Pending |
-| COLS-02 | TBD | Pending |
-| COLS-03 | TBD | Pending |
-| ERRH-01 | TBD | Pending |
-| ERRH-02 | TBD | Pending |
-| ERRH-03 | TBD | Pending |
-| PIPE-01 | TBD | Pending |
-| PIPE-02 | TBD | Pending |
-| PIPE-03 | TBD | Pending |
-| INFR-01 | TBD | Pending |
-| INFR-02 | TBD | Pending |
-| INFR-03 | TBD | Pending |
-| UICN-01 | TBD | Pending |
-| UICN-02 | TBD | Pending |
+| UPLD-01 | Phase 2 | Pending |
+| UPLD-02 | Phase 3 | Pending |
+| UPLD-03 | Phase 2 | Pending |
+| UPLD-04 | Phase 2 | Pending |
+| UPLD-05 | Phase 3 | Pending |
+| PREV-01 | Phase 4 | Pending |
+| PREV-02 | Phase 4 | Pending |
+| PREV-03 | Phase 4 | Pending |
+| COLS-01 | Phase 5 | Pending |
+| COLS-02 | Phase 5 | Pending |
+| COLS-03 | Phase 5 | Pending |
+| ERRH-01 | Phase 6 | Pending |
+| ERRH-02 | Phase 6 | Pending |
+| ERRH-03 | Phase 6 | Pending |
+| PIPE-01 | Phase 7 | Pending |
+| PIPE-02 | Phase 7 | Pending |
+| PIPE-03 | Phase 7 | Pending |
+| INFR-01 | Phase 1 | Pending |
+| INFR-02 | Phase 1 | Pending |
+| INFR-03 | Phase 1 | Pending |
+| UICN-01 | Phase 8 | Pending |
+| UICN-02 | Phase 8 | Pending |
 
 **Coverage:**
 - v1 requirements: 22 total
-- Mapped to phases: 0
-- Unmapped: 22
+- Mapped to phases: 22
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-08*
-*Last updated: 2026-02-08 after initial definition*
+*Last updated: 2026-02-08 after roadmap creation*
