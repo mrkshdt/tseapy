@@ -7,13 +7,18 @@
 {% endblock %}
 
 {% block content %}
+    {% if upload_notice %}
+      <div class="alert alert-info" role="alert">{{ upload_notice }}</div>
+    {% endif %}
+
     <div class="my-3 p-3 bg-body rounded shadow-sm">
       <h6 class="border-bottom pb-2 mb-0">Welcome</h6>
       <div class="d-flex text-muted pt-3">
           <p class="pb-3 mb-0 small lh-sm">
-              Some representative placeholder content, with some information about this task.
+              Select a task to run analysis on the configured dataset.
           </p>
       </div>
+      <a href="/upload" class="btn btn-outline-secondary btn-sm">Load Different Dataset</a>
     </div>
 
     <div class="my-3 p-3 bg-body rounded shadow-sm">

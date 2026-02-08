@@ -47,11 +47,16 @@ class Mass(PatternRecognitionBackend):
     def do_analysis(self, data, feature, pattern=None, nb_similar_patterns=5, **kwargs):
         normalize = kwargs['normalize']
         assert normalize in ['true', 'false']
-        normalize = bool(normalize)
+        normalize = normalize.lower() == 'true'
         p = float(kwargs['p'])
+        if pattern is None or len(pattern) == 0:
+            raise ValueError("Selected range is empty. Please select a valid interval on the chart.")
+
+        data_series = data[feature].astype(np.float64)
+        pattern_series = pattern.astype(np.float64)
 
         # compute distance profile
-        distance_profile = stumpy.mass(pattern, data[feature], normalize=normalize, p=p)
+        distance_profile = stumpy.mass(pattern_series, data_series, normalize=normalize, p=p)
         # get the indices (sorted) of the similar patterns
         idxs = np.argpartition(distance_profile, nb_similar_patterns+1)[:nb_similar_patterns+1]
         idxs = idxs[np.argsort(distance_profile[idxs])]

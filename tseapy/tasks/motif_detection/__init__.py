@@ -53,7 +53,7 @@ class MotifDetection(Task):
         if mutex:
             fig.append_trace(go.Scatter(
                 x=list(range(len(data[feature]))),
-                y=data['motif'],
+                y=motifs['motif'],
                 name="Motifs",
                 marker={'color': colors[2]}),  row=2,col=1)
         else:

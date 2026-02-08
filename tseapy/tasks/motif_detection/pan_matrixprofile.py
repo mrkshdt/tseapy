@@ -66,14 +66,30 @@ class PanMatrixprofile(MotifDetectionBackend):
 
     def do_analysis(self, data, feature, **kwargs):
         penalty = float(kwargs['penalty'])
-        min = int(kwargs['minimum_width'])
-        max = float(kwargs['maximum_width'])
+        min_width = int(kwargs['minimum_width'])
+        max_width = int(kwargs['maximum_width'])
         percent = int(kwargs['percentage'])
+        series = data[feature].astype(np.float64)
+        series_len = len(series)
+        if series_len < 6:
+            raise ValueError("Dataset is too short for pan matrix profile. Need at least 6 rows.")
+        if min_width < 3:
+            min_width = 3
+        upper_bound = series_len - 1
+        if min_width >= upper_bound:
+            raise ValueError(f"minimum_width must be less than {upper_bound}.")
+        max_width = min(max_width, upper_bound)
+        if max_width <= min_width:
+            raise ValueError("maximum_width must be greater than minimum_width.")
+        if percent < 1 or percent > 100:
+            raise ValueError("percentage must be between 1 and 100.")
 
-        eog = stumpy.stimp(data[feature], min_m=min, max_m=max, percentage=percent)
-        n = np.ceil((max - min) * percent).astype(int)
-
+        eog = stumpy.stimp(series, min_m=min_width, max_m=max_width, percentage=percent / 100)
+        n = max(1, int(np.ceil((max_width - min_width) * (percent / 100))))
         for _ in range(n):
-            eog.update()
+            try:
+                eog.update()
+            except Exception:
+                break
 
         return False, eog, []

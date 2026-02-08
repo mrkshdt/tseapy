@@ -2,6 +2,7 @@ import abc
 
 import plotly.express as px
 import plotly.graph_objects as go
+import pandas as pd
 from pandas import to_datetime
 from plotly.subplots import make_subplots
 from typing import List
@@ -51,6 +52,12 @@ class PatternRecognition(Task):
 
         var start = 0;
         var end = 0;
+        window.validateAnalysisRequest = function() {
+            if (start === 0 || end === 0) {
+                return 'Select a range on the chart before running MASS.';
+            }
+            return '';
+        };
         var graphDiv = document.getElementById('visualization');
         graphDiv.on('plotly_selected', function(eventData)
         {
@@ -82,10 +89,16 @@ class PatternRecognition(Task):
     def get_analysis_results(self, data, feature, algo, **kwargs):
         assert feature in data.columns
         # check parameters
-        start = kwargs['start']
-        end = kwargs['end']
-        start = to_datetime(start)
-        end = to_datetime(end)
+        start_raw = kwargs['start']
+        end_raw = kwargs['end']
+        invalid_tokens = {"", "0", "null", "undefined", "none"}
+        if str(start_raw).lower() in invalid_tokens or str(end_raw).lower() in invalid_tokens:
+            raise ValueError("Select a date range on the main chart before running pattern recognition.")
+
+        start = to_datetime(start_raw, errors="coerce", format="mixed")
+        end = to_datetime(end_raw, errors="coerce", format="mixed")
+        if pd.isna(start) or pd.isna(end):
+            raise ValueError("Could not parse the selected date range. Please re-select on the chart.")
         if start > end:
             tmp = start
             start = end
@@ -93,6 +106,8 @@ class PatternRecognition(Task):
             del tmp
         nb_similar_patterns = int(kwargs.pop('nb_similar_patterns'))
         pattern = data.loc[start:end, feature]
+        if pattern.empty:
+            raise ValueError("Selected range is empty. Please select a valid interval on the chart.")
         a = self.analysis_backend_factory.get_analysis_backend(algo=algo)
         similar_patterns = a.do_analysis(data, feature, pattern=pattern, nb_similar_patterns=nb_similar_patterns,
                                          **kwargs)
