@@ -1,6 +1,15 @@
 # tseapy
 
 <p align="center">
+  <a href="https://github.com/mrkshdt/tseapy/actions/workflows/ci.yml"><img src="https://github.com/mrkshdt/tseapy/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
+  <a href="https://github.com/mrkshdt/tseapy/actions/workflows/publish-testpypi.yml"><img src="https://github.com/mrkshdt/tseapy/actions/workflows/publish-testpypi.yml/badge.svg" alt="Publish TestPyPI" /></a>
+  <a href="https://github.com/mrkshdt/tseapy/actions/workflows/publish-pypi.yml"><img src="https://github.com/mrkshdt/tseapy/actions/workflows/publish-pypi.yml/badge.svg" alt="Publish PyPI" /></a>
+  <a href="https://pypi.org/project/tseapy/"><img src="https://img.shields.io/pypi/v/tseapy" alt="PyPI version" /></a>
+  <a href="https://pypi.org/project/tseapy/"><img src="https://img.shields.io/pypi/pyversions/tseapy" alt="Python versions" /></a>
+  <a href="https://pypi.org/project/tseapy/"><img src="https://img.shields.io/pypi/l/tseapy" alt="License" /></a>
+</p>
+
+<p align="center">
   <img src="docs/assets/tseapy-logo.png" alt="tseapy logo" width="360" />
 </p>
 
@@ -13,6 +22,10 @@ You can upload CSV data and run built-in algorithms for:
 - forecasting
 - decomposition
 - frequency analysis
+
+<p align="center">
+  <img src="docs/assets/tseapy-walkthrough.gif" alt="tseapy walkthrough demo" width="640" />
+</p>
 
 ## Install From PyPI
 
