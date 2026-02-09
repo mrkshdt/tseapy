@@ -23,7 +23,8 @@ class MotifDetection(Task):
         return ""
 
     def get_analysis_results(self, data, feature, algo, **kwargs):
-        assert feature in data.columns
+        if feature not in data.columns:
+            raise ValueError("Unknown feature column")
 
         a = self.analysis_backend_factory.get_analysis_backend(algo=algo)
         mutex, mp, motifs = a.do_analysis(data, feature, **kwargs)
@@ -32,26 +33,26 @@ class MotifDetection(Task):
         colors = px.colors.qualitative.Plotly
 
         if mutex:
-            fig.append_trace(go.Scatter(
+            fig.add_trace(go.Scatter(
                 x=list(range(len(mp))),
                 y=mp,
                 name="Distance Profile",
                 marker={'color': colors[0]}
                 ),  row=1,col=1)
         else:
-            fig.append_trace(go.Heatmap(
+            fig.add_trace(go.Heatmap(
                 z = mp.PAN_.tolist(),
                 colorscale = [[0, colors[0]], [1, 'rgb(255, 255, 255, 255)']]
                 ),  row=1,col=1)
 
-        fig.append_trace(go.Scatter(
+        fig.add_trace(go.Scatter(
             x=list(range(len(data[feature]))),
             y=data[feature],
             name="Input Time-Series",
             marker={'color': colors[0]}),  row=2,col=1)
 
         if mutex:
-            fig.append_trace(go.Scatter(
+            fig.add_trace(go.Scatter(
                 x=list(range(len(data[feature]))),
                 y=motifs['motif'],
                 name="Motifs",

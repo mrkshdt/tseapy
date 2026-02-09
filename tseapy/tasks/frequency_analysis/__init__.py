@@ -19,7 +19,8 @@ class FrequencyAnalysis(Task):
         return ""
 
     def get_analysis_results(self, data, feature, algo, **kwargs):
-        assert feature in data.columns
+        if feature not in data.columns:
+            raise ValueError("Unknown feature column")
         backend = self.analysis_backend_factory.get_analysis_backend(algo=algo)
         result = backend.do_analysis(data, feature, **kwargs)
 

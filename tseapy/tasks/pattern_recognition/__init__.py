@@ -87,7 +87,8 @@ class PatternRecognition(Task):
         return html
 
     def get_analysis_results(self, data, feature, algo, **kwargs):
-        assert feature in data.columns
+        if feature not in data.columns:
+            raise ValueError("Unknown feature column")
         # check parameters
         start_raw = kwargs['start']
         end_raw = kwargs['end']
@@ -117,7 +118,7 @@ class PatternRecognition(Task):
         colors = px.colors.qualitative.Plotly
 
         # plots selected pattern
-        fig.append_trace(go.Scatter(
+        fig.add_trace(go.Scatter(
             x=list(range(len(pattern))),
             y=pattern.values,
             mode='lines',
@@ -125,7 +126,7 @@ class PatternRecognition(Task):
             legendgroup='selected pattern',
             marker={'color': colors[0]},
         ), row=1, col=1)
-        fig.append_trace(go.Scatter(
+        fig.add_trace(go.Scatter(
             x=pattern.index,
             y=pattern.values,
             mode='lines',
@@ -137,7 +138,7 @@ class PatternRecognition(Task):
         for i, similar_pattern in enumerate(similar_patterns, start=1):
             name = f'similar pattern {i}'
             color = colors[i % len(colors)]
-            fig.append_trace(go.Scatter(
+            fig.add_trace(go.Scatter(
                 x=list(range(len(pattern))),
                 y=similar_pattern.values,
                 mode='lines',
@@ -145,7 +146,7 @@ class PatternRecognition(Task):
                 legendgroup=name,
                 marker={'color': color},
             ), row=1, col=1)
-            fig.append_trace(go.Scatter(
+            fig.add_trace(go.Scatter(
                 x=similar_pattern.index,
                 y=similar_pattern.values,
                 mode='lines',
@@ -159,7 +160,7 @@ class PatternRecognition(Task):
 
 class PatternRecognitionBackend(AnalysisBackend):
     def __init__(self, name: str, short_description: str, long_description: str, callback_url: str,
-                 parameters: List[AnalysisBackendParameter]):
+                 parameters: List[AnalysisBackendParameter], required_query_params=None):
         parameters.append(
             NumberParameter(
                 name='nb_similar_patterns',
@@ -178,7 +179,8 @@ class PatternRecognitionBackend(AnalysisBackend):
             short_description = short_description,
             long_description = long_description,
             callback_url = callback_url,
-            parameters = parameters
+            parameters = parameters,
+            required_query_params=required_query_params,
         )
 
     @abc.abstractmethod

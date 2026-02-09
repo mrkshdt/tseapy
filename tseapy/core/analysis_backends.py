@@ -5,16 +5,17 @@ from tseapy.core.parameters import AnalysisBackendParameter
 from tseapy.core import create_callback_url
 
 
-class AnalysisBackend:
+class AnalysisBackend(abc.ABC):
     """Base class for analysis backends."""
 
     def __init__(self, name: str, short_description: str, long_description: str,
-                 callback_url: str, parameters: List[AnalysisBackendParameter]):
+                 callback_url: str, parameters: List[AnalysisBackendParameter], required_query_params=None):
         self.name = name
         self.short_description = short_description
         self.long_description = long_description
         self.callback_url = callback_url
         self.parameters = parameters
+        self.required_query_params = list(required_query_params or [])
 
     @abc.abstractmethod
     def do_analysis(self, data, feature, **kwargs):
@@ -40,3 +41,6 @@ class AnalysisBackendsList:
         if algo not in self._backends:
             raise ValueError(f'Algorithm "{algo}" is unknown')
         return self._backends.get(algo)
+
+    def iter_backends(self):
+        return self._backends.values()

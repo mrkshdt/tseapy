@@ -3,7 +3,7 @@ import abc
 from tseapy.core.analysis_backends import AnalysisBackendsList, AnalysisBackend
 
 
-class Task:
+class Task(abc.ABC):
     """
 
     """
@@ -39,13 +39,23 @@ class Task:
     def get_interaction_view(self, algo: str):
         pass
 
-    @abc.abstractmethod
     def get_parameter_view(self, algo: str):
-        pass
+        return ""
 
-    def get_parameter_script(self, algo: str):
+    def get_parameter_script(self, algo: str, analysis_url: str, extra_query_params=None):
+        extra_query_params = extra_query_params or []
         a: AnalysisBackend = self.get_analysis_backend(algo)
-        url = a.callback_url
+        extra_params_js = ""
+        for param_name in extra_query_params:
+            # Query param names are controlled by backend definitions; keep script simple.
+            extra_params_js += (
+                f"""
+            if (typeof {param_name} !== 'undefined') {{
+                params.push('{param_name}=' + encodeURIComponent({param_name}));
+            }}
+                """
+            )
+        base_url_literal = repr(analysis_url)
         script = """
         function doAnalysis() {
             if (typeof window.validateAnalysisRequest === 'function') {
@@ -56,22 +66,33 @@ class Task:
                     return;
                 }
             }
-            var url = """ + url + """;
+            var analysisUrl = """ + base_url_literal + """;
+            var params = [];
+            """ + extra_params_js + """
             for (let e of document.getElementById('parameters').elements) { 
                 if (e.tagName == 'INPUT') {
                     if (e.type == 'checkbox') {
-                        url += '&' + e.id +'=' + e.checked;
+                        params.push(e.id + '=' + encodeURIComponent(e.checked));
                     } else {
-                        url += '&' + e.id +'=' + e.value;
+                        params.push(e.id + '=' + encodeURIComponent(e.value));
                     }
                 }
             } 
+            var url = analysisUrl;
+            if (params.length > 0) {
+                url += '?' + params.join('&');
+            }
             fetch(url, {method: 'GET'})
                     .then(response => {
                         if (!response.ok) {
-                            return response.json().then(err => {
-                                throw new Error(err.error || 'Analysis failed');
-                            });
+                            return response.text().then(raw => {
+                                try {
+                                    const err = JSON.parse(raw);
+                                    throw new Error(err.error || 'Analysis failed');
+                                } catch (_parseError) {
+                                    throw new Error(raw || 'Analysis failed');
+                                }
+                            })
                         }
                         return response.json();
                     })
@@ -120,3 +141,6 @@ class TasksList:
             raise ValueError(f'Task "{task}" is unknown')
         else:
             return self._tasks.get(task)
+
+    def iter_tasks(self):
+        return self._tasks.values()

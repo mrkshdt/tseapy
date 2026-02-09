@@ -25,6 +25,14 @@ def test_upload_page_available():
         assert b'Upload CSV' in resp.data
 
 
+def test_healthz_is_available_without_dataset():
+    with app.test_client() as client:
+        reset_cache_state()
+        resp = client.get('/healthz')
+        assert resp.status_code == 200
+        assert resp.get_json() == {"status": "ok"}
+
+
 def test_index_lists_new_tasks():
     with app.test_client() as client:
         reset_cache_state()
@@ -40,6 +48,16 @@ def test_new_task_pages_available():
         reset_cache_state()
         assert client.get('/decomposition').status_code == 200
         assert client.get('/frequency-analysis').status_code == 200
+        assert client.get('/forecasting').status_code == 200
+
+
+def test_forecasting_comparison_page_available():
+    with app.test_client() as client:
+        reset_cache_state()
+        cache.set('data', pd.DataFrame({'f': list(range(60))}, index=pd.date_range('2020-01-01', periods=60, freq='D')))
+        resp = client.get('/forecasting/forecast-comparison')
+        assert resp.status_code == 200
+        assert b'forecast-comparison' in resp.data
 
 
 def test_upload_rejects_non_csv():
@@ -167,6 +185,21 @@ def test_compute_missing_params():
         assert b'Missing query parameter' in resp.data
 
 
+def test_forecasting_comparison_compute_with_baselines():
+    with app.test_client() as client:
+        reset_cache_state()
+        cache.set('data', pd.DataFrame({'f': list(range(60))}, index=pd.date_range('2020-01-01', periods=60, freq='D')))
+        resp = client.get(
+            '/forecasting/forecast-comparison/compute'
+            '?horizon=5&season_length=3'
+            '&use_auto_arima=false&use_auto_ets=false&use_auto_theta=false'
+            '&use_naive=true&use_seasonal_naive=false&use_historic_average=true'
+            '&use_lightgbm=false&use_xgboost=false'
+            '&feature=f'
+        )
+        assert resp.status_code == 200
+
+
 def test_display_feature_missing_param():
     with app.test_client() as client:
         reset_cache_state()
@@ -183,3 +216,10 @@ def test_display_feature_invalid_feature():
         resp = client.get('/pattern-recognition/mass/display-feature?feature=x')
         assert resp.status_code == 400
         assert b'Unknown feature column' in resp.data
+
+
+def test_export_returns_clear_not_available_message():
+    with app.test_client() as client:
+        resp = client.get('/pattern-recognition/mass/export')
+        assert resp.status_code == 501
+        assert b'Export is not available' in resp.data

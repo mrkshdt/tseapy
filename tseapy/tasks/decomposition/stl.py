@@ -41,7 +41,10 @@ class STLBackend(DecompositionBackend):
         try:
             from statsmodels.tsa.seasonal import STL
         except ImportError as exc:
-            raise ValueError('statsmodels is required for STL decomposition.') from exc
+            raise ValueError(
+                f"statsmodels is required for STL decomposition ({exc}). "
+                "Reinstall dependencies in the active environment."
+            ) from exc
 
         period = int(kwargs['period'])
         robust_raw = str(kwargs.get('robust', 'true')).lower()

@@ -1,0 +1,42 @@
+{% extends "layouts/layout_without_sidebar.html" %}
+
+{% block title %}Upload Data{% endblock %}
+
+{% block heading %}
+  <h1>Data Wizard</h1>
+{% endblock %}
+
+{% block content %}
+  <div class="my-3 p-3 bg-body rounded shadow-sm">
+    <div class="mb-3">
+      {% include "wizard_steps.html" %}
+    </div>
+
+    <h6 class="border-bottom pb-2 mb-3">Upload CSV</h6>
+    <p class="small text-muted">Upload a CSV file (max {{ max_upload_mb }} MB) or use the built-in demo dataset.</p>
+
+    {% if error %}
+      <div class="alert alert-danger" role="alert">{{ error }}</div>
+    {% endif %}
+    {% if message %}
+      <div class="alert alert-info" role="alert">{{ message }}</div>
+    {% endif %}
+
+    <form action="/upload" method="post" enctype="multipart/form-data" class="row g-3">
+      <div class="col-12 col-lg-8">
+        <label for="file" class="form-label">CSV file</label>
+        <input class="form-control" type="file" id="file" name="file" accept=".csv,text/csv" required>
+      </div>
+      <div class="col-12">
+        <button type="submit" class="btn btn-primary">Upload and Preview</button>
+      </div>
+    </form>
+
+    <hr>
+
+    <form action="/upload" method="post">
+      <input type="hidden" name="use_demo_dataset" value="1">
+      <button type="submit" class="btn btn-outline-secondary">Use Demo Dataset</button>
+    </form>
+  </div>
+{% endblock %}

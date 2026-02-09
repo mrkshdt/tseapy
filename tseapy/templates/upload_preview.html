@@ -1,0 +1,83 @@
+{% extends "layouts/layout_without_sidebar.html" %}
+
+{% block title %}Preview Data{% endblock %}
+
+{% block heading %}
+  <h1>Data Wizard</h1>
+{% endblock %}
+
+{% block content %}
+  <div class="my-3 p-3 bg-body rounded shadow-sm">
+    <div class="mb-3">
+      {% include "wizard_steps.html" %}
+    </div>
+
+    <h6 class="border-bottom pb-2 mb-3">Preview and Configure</h6>
+
+    {% if error %}
+      <div class="alert alert-danger" role="alert">{{ error }}</div>
+    {% endif %}
+    {% if message %}
+      <div class="alert alert-info" role="alert">{{ message }}</div>
+    {% endif %}
+
+    <div class="row g-2 mb-3">
+      <div class="col-md-4">
+        <div class="small text-muted">Rows</div>
+        <div class="fw-semibold">{{ row_count }}</div>
+      </div>
+      <div class="col-md-8">
+        <div class="small text-muted">Date Range</div>
+        <div class="fw-semibold">{{ date_summary }}</div>
+      </div>
+    </div>
+
+    <div class="table-responsive mb-3">
+      {{ preview_table | safe }}
+    </div>
+
+    <div class="my-3 p-3 bg-light border rounded">
+      <h6 class="border-bottom pb-2 mb-3">Column Types</h6>
+      <div class="d-flex flex-wrap gap-2">
+        {% for column, kind in column_types.items() %}
+          <span class="badge {% if kind == 'numeric' %}text-bg-primary{% elif kind == 'date' %}text-bg-success{% else %}text-bg-secondary{% endif %}">
+            {{ column }} ({{ kind }})
+          </span>
+        {% endfor %}
+      </div>
+    </div>
+
+    <form action="/upload/configure" method="post" class="row g-3">
+      <div class="col-12 col-md-6">
+        <label for="time_column" class="form-label">Time/date column</label>
+        <select class="form-select" id="time_column" name="time_column" required>
+          <option value="" selected disabled>Select column</option>
+          {% for column in columns %}
+            <option value="{{ column }}">{{ column }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-12 col-md-6">
+        <label for="value_column" class="form-label">Value column (numeric only)</label>
+        <select class="form-select" id="value_column" name="value_column" required>
+          <option value="" selected disabled>Select numeric column</option>
+          {% for column in numeric_columns %}
+            <option value="{{ column }}">{{ column }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-12">
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="confirm_selection" name="confirm_selection">
+          <label class="form-check-label" for="confirm_selection">
+            I confirm these columns and want to continue to analysis.
+          </label>
+        </div>
+      </div>
+      <div class="col-12 d-flex gap-2">
+        <a class="btn btn-outline-secondary" href="/upload">Back to Upload</a>
+        <button type="submit" class="btn btn-primary">Proceed to Analysis</button>
+      </div>
+    </form>
+  </div>
+{% endblock %}

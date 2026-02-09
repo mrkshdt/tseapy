@@ -1,0 +1,12 @@
+<div class="p-2 d-grid gap-2">
+    <label for="{{p.name}}" class="form-label text-uppercase text-muted mb-0">{{p.label}}</label>
+    <input type="range"
+           id="{{p.name}}"
+           class="form-range"
+           min="{{p.min}}"
+           max="{{p.max}}"
+           step="{{p.step}}"
+           onclick="{{p.onclick}}"
+           {% if p.disabled %} disabled {% endif %}
+    >
+</div>
