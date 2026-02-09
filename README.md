@@ -1,5 +1,9 @@
 # tseapy
 
+<p align="center">
+  <img src="docs/assets/tseapy-logo.png" alt="tseapy logo" width="360" />
+</p>
+
 `tseapy` is an open-source web app for interactive time-series analysis.
 You can upload CSV data and run built-in algorithms for:
 - change detection
