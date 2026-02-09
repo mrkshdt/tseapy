@@ -1,0 +1,9 @@
+<div class="p-2 d-grid gap-2">
+    <label for="features" class="form-label text-uppercase text-muted mb-0">feature to display</label>
+    <select name="features" id="features" class="form-select">
+        {% for feature in features %}
+          <option value="{{ feature }}">{{ feature }}</option>
+        {% endfor %}
+    </select>
+    <button id="display-feature" onclick="displayFeature()" type="button" class="btn btn-info">Display Feature</button>
+</div>

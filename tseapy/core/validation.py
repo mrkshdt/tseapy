@@ -13,5 +13,7 @@ def validate_dataframe(df: pd.DataFrame):
     -------
 
     """
-    assert df.index.is_all_dates, 'The dataframe index should only contains dates'
-    assert df.index.is_monotonic_increasing, 'The dataframe index should only contains dates in an increasing order'
+    if not isinstance(df.index, pd.DatetimeIndex):
+        raise ValueError('The dataframe index should contain only dates')
+    if not df.index.is_monotonic_increasing:
+        raise ValueError('The dataframe index should contain dates in increasing order')

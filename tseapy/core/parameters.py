@@ -1,6 +1,10 @@
 import abc
 
 
+def _is_number(value) -> bool:
+    return isinstance(value, (int, float, complex)) and not isinstance(value, bool)
+
+
 class AnalysisBackendParameter:
     """
     A class for defining AnalysisBackend parameters
@@ -22,12 +26,18 @@ class NumberParameter(AnalysisBackendParameter):
     def __init__(self, name, label=None, description='', minimum: float = 0.0, maximum: float = 1.0, step: float = 1.0,
                  default: float = 0.0, onclick: str = '', disabled: bool = False):
         super().__init__(name, label, description, onclick, disabled)
-        assert isinstance(minimum, (int, float, complex)) and not isinstance(minimum, bool)
-        assert isinstance(maximum, (int, float, complex)) and not isinstance(maximum, bool)
-        assert isinstance(step, (int, float, complex)) and not isinstance(step, bool)
-        assert isinstance(default, (int, float, complex)) and not isinstance(default, bool)
-        assert minimum < default < maximum
-        assert step < (maximum - minimum)
+        if not _is_number(minimum):
+            raise TypeError("minimum must be a number")
+        if not _is_number(maximum):
+            raise TypeError("maximum must be a number")
+        if not _is_number(step):
+            raise TypeError("step must be a number")
+        if not _is_number(default):
+            raise TypeError("default must be a number")
+        if not minimum < default < maximum:
+            raise ValueError("default must be strictly between minimum and maximum")
+        if not step < (maximum - minimum):
+            raise ValueError("step must be less than the parameter range")
         self.min = minimum
         self.max = maximum
         self.step = step
@@ -51,10 +61,14 @@ class RangeParameter(AnalysisBackendParameter):
 
     def __init__(self, name, label=None, description='', minimum=0, maximum=1, step=1, onclick='', disabled=False):
         super().__init__(name, label, description, onclick, disabled)
-        assert isinstance(minimum, (int, float, complex)) and not isinstance(minimum, bool)
-        assert isinstance(maximum, (int, float, complex)) and not isinstance(maximum, bool)
-        assert isinstance(step, (int, float, complex)) and not isinstance(step, bool)
-        assert minimum < maximum
+        if not _is_number(minimum):
+            raise TypeError("minimum must be a number")
+        if not _is_number(maximum):
+            raise TypeError("maximum must be a number")
+        if not _is_number(step):
+            raise TypeError("step must be a number")
+        if not minimum < maximum:
+            raise ValueError("minimum must be less than maximum")
         self.min = minimum
         self.max = maximum
         self.step = step
@@ -102,7 +116,8 @@ class BooleanParameter(AnalysisBackendParameter):
 
     def __init__(self, name, label=None, description='', default=False, onclick='', disabled=False):
         super().__init__(name, label, description, onclick, disabled)
-        assert isinstance(default, bool)
+        if not isinstance(default, bool):
+            raise TypeError("default must be a bool")
         self.default = default
 
     def get_view(self) -> str:

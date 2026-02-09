@@ -1,5 +1,7 @@
 import json
+import os
 import secrets
+from pathlib import Path
 
 import pandas as pd
 import plotly.utils
@@ -25,6 +27,12 @@ from tseapy.tasks.forecasting import Forecasting
 from tseapy.tasks.forecasting.auto_arima import AutoArimaBackend
 from tseapy.tasks.forecasting.auto_ets import AutoEtsBackend
 from tseapy.tasks.forecasting.auto_theta import AutoThetaBackend
+from tseapy.tasks.forecasting.naive import NaiveBackend
+from tseapy.tasks.forecasting.seasonal_naive import SeasonalNaiveBackend
+from tseapy.tasks.forecasting.historic_average import HistoricAverageBackend
+from tseapy.tasks.forecasting.lightgbm_mlforecast import LightGBMMLForecastBackend
+from tseapy.tasks.forecasting.xgboost_mlforecast import XGBoostMLForecastBackend
+from tseapy.tasks.forecasting.comparison import ForecastComparisonBackend
 from tseapy.tasks.decomposition import Decomposition
 from tseapy.tasks.decomposition.stl import STLBackend
 from tseapy.tasks.decomposition.classical import ClassicalDecompositionBackend
@@ -34,57 +42,90 @@ from tseapy.tasks.frequency_analysis.lomb_scargle import LombScargleBackend
 from tseapy.tasks.frequency_analysis.stft import STFTBackend
 from tseapy.core.parameters import NumberParameter, BooleanParameter, ListParameter, RangeParameter
 
-cache = Cache(
-    config={
-        "DEBUG": True,  # some Flask specific configs
-        "CACHE_TYPE": "SimpleCache",  # Flask-Caching related configs
-        "CACHE_DEFAULT_TIMEOUT": 3600
-    }
-)
-app = Flask(__name__)
-app.secret_key = secrets.token_hex()
-app.config["MAX_CONTENT_LENGTH"] = 10 * 1024 * 1024
-cache.init_app(app)
-
-pattern_recognition = PatternRecognition()
-pattern_recognition.add_analysis_backend(Mass())
-
-change_in_mean = ChangeInMean()
-change_in_mean.add_analysis_backend(PeltL2())
-change_in_mean.add_analysis_backend(SlidingWindowL2())
-
-smoothing = Smoothing()
-smoothing.add_analysis_backend(MovingAverage())
-
-motif_detection = MotifDetection()
-motif_detection.add_analysis_backend(Matrixprofile())
-motif_detection.add_analysis_backend(PanMatrixprofile())
-
-forecasting = Forecasting()
-forecasting.add_analysis_backend(AutoArimaBackend())
-forecasting.add_analysis_backend(AutoEtsBackend())
-forecasting.add_analysis_backend(AutoThetaBackend())
-
-decomposition = Decomposition()
-decomposition.add_analysis_backend(STLBackend())
-decomposition.add_analysis_backend(ClassicalDecompositionBackend())
-
-frequency_analysis = FrequencyAnalysis()
-frequency_analysis.add_analysis_backend(WelchBackend())
-frequency_analysis.add_analysis_backend(LombScargleBackend())
-frequency_analysis.add_analysis_backend(STFTBackend())
-
+cache = Cache()
 tasks = TasksList()
-tasks.add_task(pattern_recognition)
-tasks.add_task(change_in_mean)
-tasks.add_task(motif_detection)
-tasks.add_task(smoothing)
-tasks.add_task(forecasting)
-tasks.add_task(decomposition)
-tasks.add_task(frequency_analysis)
+
+
+def _env_bool(name: str, default: bool = False) -> bool:
+    raw = os.getenv(name)
+    if raw is None:
+        return default
+    return raw.strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _build_tasks_registry() -> TasksList:
+    pattern_recognition = PatternRecognition()
+    pattern_recognition.add_analysis_backend(Mass())
+
+    change_in_mean = ChangeInMean()
+    change_in_mean.add_analysis_backend(PeltL2())
+    change_in_mean.add_analysis_backend(SlidingWindowL2())
+
+    smoothing = Smoothing()
+    smoothing.add_analysis_backend(MovingAverage())
+
+    motif_detection = MotifDetection()
+    motif_detection.add_analysis_backend(Matrixprofile())
+    motif_detection.add_analysis_backend(PanMatrixprofile())
+
+    forecasting = Forecasting()
+    forecasting.add_analysis_backend(AutoArimaBackend())
+    forecasting.add_analysis_backend(AutoEtsBackend())
+    forecasting.add_analysis_backend(AutoThetaBackend())
+    forecasting.add_analysis_backend(NaiveBackend())
+    forecasting.add_analysis_backend(SeasonalNaiveBackend())
+    forecasting.add_analysis_backend(HistoricAverageBackend())
+    forecasting.add_analysis_backend(LightGBMMLForecastBackend())
+    forecasting.add_analysis_backend(XGBoostMLForecastBackend())
+    forecasting.add_analysis_backend(ForecastComparisonBackend())
+
+    decomposition = Decomposition()
+    decomposition.add_analysis_backend(STLBackend())
+    decomposition.add_analysis_backend(ClassicalDecompositionBackend())
+
+    frequency_analysis = FrequencyAnalysis()
+    frequency_analysis.add_analysis_backend(WelchBackend())
+    frequency_analysis.add_analysis_backend(LombScargleBackend())
+    frequency_analysis.add_analysis_backend(STFTBackend())
+
+    tasks_registry = TasksList()
+    tasks_registry.add_task(pattern_recognition)
+    tasks_registry.add_task(change_in_mean)
+    tasks_registry.add_task(motif_detection)
+    tasks_registry.add_task(smoothing)
+    tasks_registry.add_task(forecasting)
+    tasks_registry.add_task(decomposition)
+    tasks_registry.add_task(frequency_analysis)
+    return tasks_registry
+
+
+def create_app(config: dict | None = None) -> Flask:
+    package_root = Path(__file__).resolve().parent / "tseapy"
+    flask_app = Flask(
+        __name__,
+        template_folder=str(package_root / "templates"),
+        static_folder=str(package_root / "static"),
+    )
+
+    max_upload_mb = int(os.getenv("TSEAPY_MAX_UPLOAD_MB", "10"))
+    flask_app.config.from_mapping(
+        SECRET_KEY=os.getenv("TSEAPY_SECRET_KEY", secrets.token_hex()),
+        DEBUG=_env_bool("TSEAPY_DEBUG", False),
+        MAX_CONTENT_LENGTH=max_upload_mb * 1024 * 1024,
+        CACHE_TYPE=os.getenv("TSEAPY_CACHE_TYPE", "SimpleCache"),
+        CACHE_DEFAULT_TIMEOUT=int(os.getenv("TSEAPY_CACHE_DEFAULT_TIMEOUT", "3600")),
+    )
+    if config:
+        flask_app.config.update(config)
+
+    cache.init_app(flask_app)
+    global tasks
+    tasks = _build_tasks_registry()
+    return flask_app
 
 ALLOWED_EXTENSIONS = {"csv"}
 UPLOAD_STEPS = ("upload", "preview", "configure", "analysis")
+app = create_app()
 
 
 def allowed_file(filename: str) -> bool:
@@ -167,7 +208,11 @@ def render_algo_template(t: Task, a: AnalysisBackend):
     data_view = t.get_visualization_view(data=data, feature_to_display=get_feature_to_display())
     interaction_script = t.get_interaction_script(algo=a.name)
     interaction_view = t.get_interaction_view(algo=a.name)
-    parameter_script = t.get_parameter_script(algo=a.name)
+    parameter_script = t.get_parameter_script(
+        algo=a.name,
+        analysis_url=url_for("perform_analysis", task=t.name, algo=a.name),
+        extra_query_params=a.required_query_params,
+    )
     html = render_template(
         'algo.html',
         task=t.name,
@@ -182,6 +227,11 @@ def render_algo_template(t: Task, a: AnalysisBackend):
     return html
 
 
+@app.route('/healthz')
+def healthz():
+    return jsonify({"status": "ok"}), 200
+
+
 # create index page function
 @app.route('/')
 def index():
@@ -191,7 +241,7 @@ def index():
     upload_notice = session.pop("upload_notice", None)
     html = render_template(
         'index.html',
-        tasks=[(t.name, t.short_description) for t in tasks._tasks.values()],
+        tasks=[(t.name, t.short_description) for t in tasks.iter_tasks()],
         upload_notice=upload_notice,
     )
     return html
@@ -312,7 +362,7 @@ def display_task(task):
         'task.html',
         task=task,
         description=t.short_description,
-        algorithms=[(a.name, a.short_description) for a in t.analysis_backend_factory._backends.values()]
+        algorithms=[(a.name, a.short_description) for a in t.analysis_backend_factory.iter_backends()]
     )
     return html
 
@@ -330,15 +380,9 @@ def display_algo(task, algo):
 
 def _expected_params(backend: AnalysisBackend):
     params = [p.name for p in backend.parameters]
-    callback = backend.callback_url.strip("'")
-    if 'compute?' in callback:
-        query = callback.split('compute?')[1]
-        if query:
-            for part in query.split('&'):
-                if part:
-                    name = part.split('=')[0]
-                    if name and name not in params:
-                        params.append(name)
+    for name in backend.required_query_params:
+        if name not in params:
+            params.append(name)
     return params
 
 
@@ -405,16 +449,9 @@ def display_feature(task, algo):
 def export(task, algo):
     t: Task = get_task_or_abort(task)
     a: AnalysisBackend = get_backend_or_abort(t, algo)
-
-    # get data
-
-    # get task name
-
-    # get backend name, library used, version, method, parameters name, values
-
-    # get results
-
-    raise NotImplementedError()
+    return jsonify({
+        "error": f"Export is not available for '{t.name}/{a.name}' in this release."
+    }), 501
 
 #make function available to templates
 @app.context_processor
@@ -453,5 +490,13 @@ def file_too_large(_error):
 def favicon():
     return "", 204
 
+
+def main(host: str | None = None, port: int | None = None, debug: bool | None = None):
+    run_host = host or os.getenv("TSEAPY_HOST", "127.0.0.1")
+    run_port = int(port if port is not None else os.getenv("TSEAPY_PORT", "5000"))
+    run_debug = bool(app.config.get("DEBUG", False)) if debug is None else debug
+    app.run(host=run_host, port=run_port, debug=run_debug)
+
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    main()

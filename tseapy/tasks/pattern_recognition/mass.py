@@ -21,7 +21,8 @@ class Mass(PatternRecognitionBackend):
             name='mass',
             short_description=short_description,
             long_description=long_description,
-            callback_url=create_callback_url('pattern-recognition', 'mass', *['start', 'end']),
+            callback_url=create_callback_url('pattern-recognition', 'mass'),
+            required_query_params=['start', 'end'],
             parameters=[
                 BooleanParameter(
                     name='normalize',
@@ -46,7 +47,8 @@ class Mass(PatternRecognitionBackend):
 
     def do_analysis(self, data, feature, pattern=None, nb_similar_patterns=5, **kwargs):
         normalize = kwargs['normalize']
-        assert normalize in ['true', 'false']
+        if str(normalize).lower() not in ['true', 'false']:
+            raise ValueError("normalize must be true or false.")
         normalize = normalize.lower() == 'true'
         p = float(kwargs['p'])
         if pattern is None or len(pattern) == 0:
