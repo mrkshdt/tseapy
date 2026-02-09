@@ -33,3 +33,19 @@ docker build -t tseapy:release .
 ```
 
 Then publish artifacts from `dist/` with your chosen release channel.
+
+## Trusted Publishing (OIDC)
+
+Use these values when configuring trusted publishers:
+
+- Owner: `mrkshdt`
+- Repository: `tseapy`
+- TestPyPI workflow file: `publish-testpypi.yml`
+- TestPyPI environment: `testpypi`
+- PyPI workflow file: `publish-pypi.yml`
+- PyPI environment: `pypi`
+
+Workflow triggers:
+
+- TestPyPI: manually via GitHub Actions (`workflow_dispatch`)
+- PyPI: on GitHub release publish, or manual dispatch
