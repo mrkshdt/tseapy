@@ -1,12 +1,32 @@
-# tseapy: Time Series Explorative Analysis Python
+# tseapy
 
-**tseapy** is an open-source web app for interactive time series analysis. Users can upload CSV data and run built-in algorithms (change detection, pattern recognition, motif detection, smoothing, forecasting, decomposition, frequency analysis) in the browser.
+`tseapy` is an open-source web app for interactive time-series analysis.
+You can upload CSV data and run built-in algorithms for:
+- change detection
+- pattern recognition
+- motif detection
+- smoothing
+- forecasting
+- decomposition
+- frequency analysis
 
-## Quick Start (from source)
+## Install From PyPI
 
 Prerequisites:
 - Python 3.10+
 - pip
+
+```bash
+python3 -m venv /tmp/tseapy-run
+source /tmp/tseapy-run/bin/activate
+python -m pip install -U pip
+python -m pip install tseapy
+tseapy --host 127.0.0.1 --port 5000 --no-debug
+```
+
+Open [http://127.0.0.1:5000](http://127.0.0.1:5000).
+
+## Install From Source
 
 ```bash
 git clone https://github.com/mrkshdt/tseapy.git
@@ -15,101 +35,73 @@ make install
 make run
 ```
 
-Open [http://127.0.0.1:5000](http://127.0.0.1:5000).
-
-If you do not want `make`:
+No `make`:
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-python -m pip install --upgrade pip
-python -m pip install setuptools wheel
-python -m pip install --no-build-isolation .
+python -m pip install -U pip setuptools wheel
+python -m pip install .
 tseapy --host 127.0.0.1 --port 5000 --no-debug
 ```
 
-For editable installs, use:
+Editable mode (developer workflow):
 
 ```bash
 make install-editable
 ```
 
-## Test and Packaging Commands
-
-Run tests:
+## Common Commands
 
 ```bash
 make test
-```
-
-Build source and wheel artifacts:
-
-```bash
 make build
-```
-
-Smoke-test the built wheel in a clean virtual environment:
-
-```bash
 make wheel-smoke
-```
-
-Offline smoke test (verifies wheel install and CLI entrypoint without downloading dependencies):
-
-```bash
 make wheel-smoke-offline
 ```
 
-Manual equivalents:
-
-```bash
-.venv/bin/python -m pytest -q
-.venv/bin/python -m build --no-isolation
-python3 -m venv /tmp/tseapy-wheel-test
-/tmp/tseapy-wheel-test/bin/pip install dist/*.whl
-/tmp/tseapy-wheel-test/bin/tseapy --help
-```
-
 ## Docker
-
-Build and run:
 
 ```bash
 docker build -t tseapy:local .
 docker run --rm -p 5000:5000 -e TSEAPY_SECRET_KEY=dev-secret tseapy:local
 ```
 
-Or with compose:
+With compose:
 
 ```bash
 docker compose up --build
 ```
 
-Health check endpoint:
+Health check:
 
 ```bash
 curl http://127.0.0.1:5000/healthz
 ```
 
-## CLI and WSGI
+## Runtime Configuration
 
-CLI:
+Environment variables:
+- `TSEAPY_HOST` (default `127.0.0.1`)
+- `TSEAPY_PORT` (default `5000`)
+- `TSEAPY_DEBUG` (`0` or `1`)
+- `TSEAPY_SECRET_KEY` (recommended in shared environments)
+- `TSEAPY_MAX_UPLOAD_MB` (default `10`)
+- `TSEAPY_CACHE_TYPE` (default `SimpleCache`)
+- `TSEAPY_CACHE_DEFAULT_TIMEOUT` (default `3600`)
 
-```bash
-tseapy --host 0.0.0.0 --port 8000 --debug
-```
+## Production Serving
 
-WSGI:
+WSGI entrypoint:
 
 ```bash
 gunicorn wsgi:app
 ```
 
-## Project Structure
+## Documentation
 
-- `app.py`: Flask app and routes.
-- `tseapy/`: core package code (tasks, data, core abstractions, templates, static assets).
-- `tests/`: unit and integration tests.
-- `pyproject.toml`: package metadata and build configuration.
-- `Dockerfile`: container build for reproducible runtime.
-- `RELEASE.md`: release definition-of-done and checklist.
+- `CONTRIBUTING.md`: development workflow and contribution standards
+- `RELEASE.md`: release runbook and trusted-publishing configuration
+- `TROUBLESHOOTING.md`: setup and publish failure fixes
+- `VERSIONING.md`: version bump policy
+- `CHANGELOG.md`: release notes history

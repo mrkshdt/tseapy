@@ -1,64 +1,75 @@
 # Contributing to tseapy
 
+## Principles
+
+- Keep changes focused and reversible.
+- Prefer explicit failure messages over silent handling.
+- Keep user workflows (`pip install`, `tseapy`, upload -> analyze) stable.
+
 ## Local Setup
 
 ```bash
 make install
 ```
 
-This creates `.venv`, upgrades pip, and installs the project as a regular package (the most reliable mode for Python 3.13 CLI entrypoints).
+This creates `.venv`, upgrades base tooling, and installs `tseapy`.
 
-If you specifically need editable mode during development:
+Editable install:
 
 ```bash
 make install-editable
 ```
 
-## Test Commands
-
-Run unit/integration tests:
+## Developer Commands
 
 ```bash
 make test
-```
-
-Build source and wheel artifacts:
-
-```bash
 make build
-```
-
-Smoke-test the built wheel in a clean virtual environment:
-
-```bash
 make wheel-smoke
-```
-
-If your environment cannot reach PyPI:
-
-```bash
 make wheel-smoke-offline
-```
-
-## Run the App Locally
-
-```bash
 make run
 ```
 
-Then open [http://127.0.0.1:5000](http://127.0.0.1:5000).
+## What to Validate Before PR
+
+- `make test` passes.
+- `make build` passes.
+- CLI starts (`tseapy --help`).
+- Main browser flow works:
+  1. upload CSV
+  2. configure columns
+  3. run at least one algorithm
+
+## Pull Requests
+
+- Use small PRs with a clear objective.
+- Include a short validation section in PR description:
+  - commands run
+  - outcomes
+  - limitations (if any)
+- If behavior changed, update:
+  - `README.md`
+  - `TROUBLESHOOTING.md`
+  - `CHANGELOG.md` (under `Unreleased`)
+
+## Release-Related Changes
+
+If your PR impacts packaging, publishing, or deployment paths, also update:
+- `RELEASE.md`
+- `VERSIONING.md`
+
+## Changelog Process
+
+When your PR affects user-visible behavior:
+
+1. Add an entry in `CHANGELOG.md` under `Unreleased`.
+2. Use one of: `Added`, `Changed`, `Fixed`, `Removed`.
+3. Keep entries concise and outcome-focused.
 
 ## Docker Runtime
-
-Build and run the container:
 
 ```bash
 docker build -t tseapy:local .
 docker run --rm -p 5000:5000 -e TSEAPY_SECRET_KEY=dev-secret tseapy:local
-```
-
-Health check endpoint:
-
-```bash
 curl http://127.0.0.1:5000/healthz
 ```
