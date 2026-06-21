@@ -3,15 +3,7 @@ import pandas as pd
 from tseapy.core import create_callback_url
 from tseapy.core.parameters import BooleanParameter, NumberParameter
 from tseapy.tasks.forecasting import ForecastingBackend
-from tseapy.tasks.forecasting.auto_arima import AutoArimaBackend
-from tseapy.tasks.forecasting.auto_ets import AutoEtsBackend
-from tseapy.tasks.forecasting.auto_theta import AutoThetaBackend
-from tseapy.tasks.forecasting.historic_average import HistoricAverageBackend
-from tseapy.tasks.forecasting.lightgbm_mlforecast import LightGBMMLForecastBackend
-from tseapy.tasks.forecasting.naive import NaiveBackend
-from tseapy.tasks.forecasting.seasonal_naive import SeasonalNaiveBackend
-from tseapy.tasks.forecasting.xgboost_mlforecast import XGBoostMLForecastBackend
-from tseapy.tasks.forecasting.common import parse_bool, point_metrics
+from tseapy.tasks.forecasting.common import point_metrics, run_backend, select_backends
 
 
 class ForecastComparisonBackend(ForecastingBackend):
@@ -59,35 +51,11 @@ class ForecastComparisonBackend(ForecastingBackend):
 
     @staticmethod
     def _selected_backends(kwargs):
-        candidates = [
-            ('AutoARIMA', 'use_auto_arima', AutoArimaBackend),
-            ('AutoETS', 'use_auto_ets', AutoEtsBackend),
-            ('AutoTheta', 'use_auto_theta', AutoThetaBackend),
-            ('Naive', 'use_naive', NaiveBackend),
-            ('SeasonalNaive', 'use_seasonal_naive', SeasonalNaiveBackend),
-            ('HistoricAverage', 'use_historic_average', HistoricAverageBackend),
-            ('LightGBM', 'use_lightgbm', LightGBMMLForecastBackend),
-            ('XGBoost', 'use_xgboost', XGBoostMLForecastBackend),
-        ]
-
-        selected = []
-        for display_name, flag_name, backend_cls in candidates:
-            raw_flag = kwargs.get(flag_name, 'false')
-            if parse_bool(raw_flag, name=flag_name):
-                selected.append((display_name, backend_cls))
-
-        if len(selected) < 2:
-            raise ValueError('Select at least 2 forecasting methods for comparison.')
-        return selected
+        return select_backends(kwargs, minimum=2)
 
     @staticmethod
     def _run_backend(backend_cls, data, feature, horizon, season_length):
-        backend = backend_cls()
-        param_names = {p.name for p in backend.parameters}
-        model_kwargs = {'horizon': horizon}
-        if 'season_length' in param_names:
-            model_kwargs['season_length'] = season_length
-        return backend.do_analysis(data=data, feature=feature, **model_kwargs)
+        return run_backend(backend_cls, data, feature, horizon, season_length)
 
     def do_analysis(self, data: pd.DataFrame, feature: str, **kwargs):
         horizon = int(kwargs['horizon'])

@@ -33,6 +33,7 @@ from tseapy.tasks.forecasting.historic_average import HistoricAverageBackend
 from tseapy.tasks.forecasting.lightgbm_mlforecast import LightGBMMLForecastBackend
 from tseapy.tasks.forecasting.xgboost_mlforecast import XGBoostMLForecastBackend
 from tseapy.tasks.forecasting.comparison import ForecastComparisonBackend
+from tseapy.tasks.forecasting.backtest import BacktestBackend
 from tseapy.tasks.decomposition import Decomposition
 from tseapy.tasks.decomposition.stl import STLBackend
 from tseapy.tasks.decomposition.classical import ClassicalDecompositionBackend
@@ -78,6 +79,7 @@ def _build_tasks_registry() -> TasksList:
     forecasting.add_analysis_backend(LightGBMMLForecastBackend())
     forecasting.add_analysis_backend(XGBoostMLForecastBackend())
     forecasting.add_analysis_backend(ForecastComparisonBackend())
+    forecasting.add_analysis_backend(BacktestBackend())
 
     decomposition = Decomposition()
     decomposition.add_analysis_backend(STLBackend())

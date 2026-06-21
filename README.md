@@ -19,7 +19,7 @@ You can upload CSV data and run built-in algorithms for:
 - pattern recognition
 - motif detection
 - smoothing
-- forecasting
+- forecasting (incl. multi-method comparison and rolling-window cross-validation backtesting with automatic model selection)
 - decomposition
 - frequency analysis
 
