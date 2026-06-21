@@ -23,6 +23,12 @@ You can upload CSV data and run built-in algorithms for:
 - decomposition
 - frequency analysis
 
+It also ships an **autonomous Insights Agent**: once you load a dataset it runs
+a suite of deterministic analyses in the background (anomalies, trends, mean
+shifts, cross-feature correlations, lead/lag links and seasonality) without being
+prompted, ranks what it finds, and renders each finding's chart on demand at
+`/agent`.
+
 <p align="center">
   <img src="docs/assets/tseapy-walkthrough.gif" alt="tseapy walkthrough demo" width="640" />
 </p>

@@ -1,0 +1,155 @@
+{% extends "layouts/layout_without_sidebar.html" %}
+
+{% block title %}Insights Agent{% endblock %}
+
+{% block head %}
+  {{ super() }}
+  <!-- Font Awesome via CDN (the without-sidebar layout points at a local path) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+  <!-- Plotly (the without-sidebar layout does not include it by default) -->
+  <script src='https://cdn.plot.ly/plotly-2.35.2.min.js'></script>
+{% endblock %}
+
+{% block heading %}
+  <h1><i class="fas fa-robot"></i> Insights Agent</h1>
+  <a href="/upload" class="btn btn-outline-secondary btn-sm">Load Different Dataset</a>
+{% endblock %}
+
+{% block content %}
+  <div class="alert alert-info" role="alert">
+    The agent automatically analyses your dataset in the background &mdash; no prompting needed.
+    It looks for anomalies, trends, mean shifts, correlations, lead/lag links and seasonality,
+    then ranks what it finds. Open a card to render its chart on demand.
+  </div>
+
+  <div id="agent-status" class="my-3 p-3 bg-body rounded shadow-sm">
+    <div class="d-flex justify-content-between align-items-center">
+      <h6 class="mb-0" id="status-label">Starting up&hellip;</h6>
+      <span class="badge bg-secondary" id="finding-count">0 findings</span>
+    </div>
+    <div class="progress mt-2" role="progressbar" aria-label="analysis progress">
+      <div id="status-bar" class="progress-bar progress-bar-striped progress-bar-animated"
+           style="width: 0%"></div>
+    </div>
+  </div>
+
+  <div id="findings" class="row row-cols-1 row-cols-md-2 g-3"></div>
+  <div id="empty-note" class="text-muted small d-none">
+    No notable findings yet for this dataset.
+  </div>
+{% endblock %}
+
+{% block script %}
+<script>
+  const SEVERITY_CLASS = { high: 'danger', notable: 'warning', info: 'secondary' };
+  const KIND_ICON = {
+    anomaly: 'fa-triangle-exclamation', trend: 'fa-arrow-trend-up',
+    changepoint: 'fa-stairs', correlation: 'fa-link',
+    lag: 'fa-clock-rotate-left', seasonality: 'fa-wave-square'
+  };
+  const renderedFigures = new Set();
+  const seenFindings = new Set();
+
+  function metricsText(metrics) {
+    return Object.entries(metrics || {})
+      .map(([k, v]) => `${k}=${v}`).join(' · ');
+  }
+
+  function renderFinding(f) {
+    if (seenFindings.has(f.id)) return;
+    seenFindings.add(f.id);
+    const colour = SEVERITY_CLASS[f.severity] || 'secondary';
+    const icon = KIND_ICON[f.kind] || 'fa-magnifying-glass-chart';
+    const safeId = 'fig-' + f.id.replace(/[^a-zA-Z0-9_-]/g, '-');
+    const col = document.createElement('div');
+    col.className = 'col';
+    col.innerHTML = `
+      <div class="card h-100 shadow-sm border-${colour}">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start">
+            <h6 class="card-title mb-1"><i class="fas ${icon} me-1"></i>${f.title}</h6>
+            <span class="badge bg-${colour} text-uppercase">${f.severity}</span>
+          </div>
+          <p class="card-text small text-muted mb-2">${f.detail}</p>
+          <p class="card-text"><small class="text-muted">${metricsText(f.metrics)}</small></p>
+          <button class="btn btn-sm btn-outline-primary" type="button"
+                  data-finding="${f.id}" data-target="${safeId}">Show chart</button>
+          <div id="${safeId}" class="mt-3"></div>
+        </div>
+      </div>`;
+    col.querySelector('button').addEventListener('click', (ev) => loadFigure(ev.target));
+    document.getElementById('findings').appendChild(col);
+  }
+
+  function loadFigure(button) {
+    const findingId = button.dataset.finding;
+    const target = document.getElementById(button.dataset.target);
+    if (renderedFigures.has(findingId)) {
+      target.classList.toggle('d-none');
+      return;
+    }
+    button.disabled = true;
+    button.textContent = 'Loading…';
+    fetch(`/agent/findings/${encodeURIComponent(findingId)}/figure`)
+      .then(r => { if (!r.ok) throw new Error('Figure unavailable'); return r.json(); })
+      .then(fig => {
+        Plotly.newPlot(target, fig.data || [], fig.layout || {}, {responsive: true});
+        renderedFigures.add(findingId);
+        button.textContent = 'Hide chart';
+        button.disabled = false;
+        button.addEventListener('click', () => target.classList.toggle('d-none'));
+      })
+      .catch(err => {
+        target.innerHTML = `<div class="alert alert-danger py-1 small">${err.message}</div>`;
+        button.textContent = 'Show chart';
+        button.disabled = false;
+      });
+  }
+
+  function refreshFindings() {
+    fetch('/agent/findings')
+      .then(r => r.json())
+      .then(payload => {
+        const findings = payload.findings || [];
+        findings.forEach(renderFinding);
+        document.getElementById('empty-note')
+          .classList.toggle('d-none', findings.length > 0 || pollTimer === null ? findings.length > 0 : true);
+      });
+  }
+
+  let pollTimer = null;
+  function poll() {
+    fetch('/agent/status')
+      .then(r => r.json())
+      .then(s => {
+        const pct = s.total ? Math.round(100 * s.completed / s.total) : 0;
+        const bar = document.getElementById('status-bar');
+        bar.style.width = pct + '%';
+        document.getElementById('finding-count').textContent =
+          s.finding_count + (s.finding_count === 1 ? ' finding' : ' findings');
+        const label = document.getElementById('status-label');
+        if (s.status === 'running') {
+          label.textContent = (s.current || 'Analysing') + '…';
+        } else if (s.status === 'done') {
+          label.textContent = 'Analysis complete';
+          bar.classList.remove('progress-bar-animated', 'progress-bar-striped');
+        } else if (s.status === 'error') {
+          label.textContent = 'Analysis failed';
+          bar.classList.add('bg-danger');
+        } else {
+          label.textContent = 'Waiting for dataset…';
+        }
+        refreshFindings();
+        if (s.status === 'running' || s.status === 'idle') {
+          pollTimer = setTimeout(poll, 1000);
+        } else {
+          pollTimer = null;
+          document.getElementById('empty-note')
+            .classList.toggle('d-none', s.finding_count > 0);
+        }
+      })
+      .catch(() => { pollTimer = setTimeout(poll, 2000); });
+  }
+  poll();
+</script>
+{% endblock %}

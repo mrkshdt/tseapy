@@ -41,6 +41,7 @@ from tseapy.tasks.frequency_analysis.welch import WelchBackend
 from tseapy.tasks.frequency_analysis.lomb_scargle import LombScargleBackend
 from tseapy.tasks.frequency_analysis.stft import STFTBackend
 from tseapy.core.parameters import NumberParameter, BooleanParameter, ListParameter, RangeParameter
+from tseapy.agent import engine as insights_engine, build_figure
 
 cache = Cache()
 tasks = TasksList()
@@ -200,6 +201,30 @@ def get_feature_to_display():
     return session.get('feature_to_display', data.columns[0])
 
 
+def get_agent_dataframe():
+    """Return the multi-feature numeric frame the insights agent analyzes.
+
+    Falls back to the single-feature ``data`` frame when a full multi-feature
+    frame is not available (e.g. a dataset configured before this feature).
+    """
+    agent_data = cache.get('agent_data')
+    if agent_data is not None:
+        return agent_data
+    return cache.get('data')
+
+
+def ensure_agent_started():
+    """Launch the agent over the loaded dataset if it has not run yet.
+
+    This makes the agent self-starting: the analysis kicks off automatically
+    whenever a dataset is present, without the user asking for it. Re-running on
+    an identical dataset is a no-op.
+    """
+    data = get_agent_dataframe()
+    if data is not None and not data.empty:
+        insights_engine.start(data)
+
+
 def render_algo_template(t: Task, a: AnalysisBackend):
     """
     Utility function to render a specific algorithm template
@@ -245,6 +270,50 @@ def index():
         upload_notice=upload_notice,
     )
     return html
+
+
+@app.route('/agent')
+def agent_dashboard():
+    """Dashboard for the autonomous insights agent."""
+    if get_agent_dataframe() is None:
+        return redirect(url_for("upload"))
+    ensure_agent_started()
+    return render_template('agent.html')
+
+
+@app.route('/agent/status')
+def agent_status():
+    """Return the agent's progress and finding count as JSON (for polling)."""
+    if get_agent_dataframe() is not None:
+        ensure_agent_started()
+    return jsonify(insights_engine.status())
+
+
+@app.route('/agent/findings')
+def agent_findings():
+    """Return the ranked findings as JSON summaries."""
+    findings = [f.to_summary() for f in insights_engine.findings()]
+    return jsonify({"findings": findings})
+
+
+@app.route('/agent/findings/<finding_id>/figure')
+def agent_finding_figure(finding_id):
+    """Build and return the Plotly figure for a single finding, on demand."""
+    finding = insights_engine.get_finding(finding_id)
+    if finding is None:
+        abort(404, description=f"Unknown finding '{finding_id}'")
+    data = insights_engine.data()
+    if data is None:
+        abort(400, description="No dataset is loaded for the agent.")
+    try:
+        fig = build_figure(finding, data)
+    except (ValueError, KeyError) as exc:
+        abort(400, description=f"Could not build figure: {exc}")
+    return app.response_class(
+        response=json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder),
+        status=200,
+        mimetype='application/json',
+    )
 
 
 @app.route('/upload', methods=['GET', 'POST'])
@@ -344,9 +413,27 @@ def upload_configure():
         )
         return render_template("upload_preview.html", error="Configuration produced an empty dataset.", **context), 400
 
+    # Build a multi-feature numeric frame (all numeric columns, not just the
+    # selected one) so the insights agent can look for cross-feature
+    # correlations. The single-feature ``data`` frame still powers the manual
+    # task pages.
+    agent_frame = dataframe.drop(columns=[time_column], errors="ignore").apply(
+        pd.to_numeric, errors="coerce"
+    )
+    agent_frame.index = parsed_index
+    valid_rows = parsed_index.notna().to_numpy()
+    agent_frame = agent_frame.loc[valid_rows].dropna(axis=1, how="all").sort_index()
+
     cache.set("data", configured)
+    if not agent_frame.empty and agent_frame.shape[1] >= 1:
+        cache.set("agent_data", agent_frame)
+    else:
+        cache.delete("agent_data")
     cache.delete("raw_data")
     session["feature_to_display"] = value_column
+
+    # Kick off the autonomous analysis in the background immediately.
+    ensure_agent_started()
     if removed_rows > 0:
         session["upload_notice"] = f"{removed_rows} rows were removed due to missing values."
     else:
