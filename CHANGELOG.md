@@ -6,8 +6,21 @@ The format is inspired by Keep a Changelog.
 
 ## [Unreleased]
 
+### Added
+- Autonomous **Insights Agent** (`tseapy/agent/`) that analyses a loaded
+  dataset in a background thread without being prompted, running deterministic
+  analyzers for anomalies, trends, mean shifts, cross-feature correlations,
+  lead/lag relationships and seasonality, then ranking the findings by score.
+- `/agent` dashboard that polls agent progress and renders one card per finding,
+  building each finding's Plotly figure on demand.
+- Agent JSON endpoints: `/agent/status`, `/agent/findings`, and
+  `/agent/findings/<id>/figure`.
+- Agent links in the home page and header navigation.
+
 ### Changed
-- No unreleased changes yet.
+- Upload configuration now retains a multi-feature numeric frame (`agent_data`)
+  alongside the single-feature analysis frame so the agent can find
+  cross-feature correlations, and auto-launches the agent once data is loaded.
 
 ## [1.2.0a0] - 2026-02-09
 
