@@ -83,6 +83,60 @@ def point_metrics(actual, predicted) -> dict[str, float]:
     return {"mae": mae, "rmse": rmse, "mape": mape}
 
 
+def get_candidate_backends():
+    """Return the registry of selectable forecasting backends.
+
+    Imports are performed lazily to avoid a circular import: each backend
+    module imports helpers from this module.
+    """
+    from tseapy.tasks.forecasting.auto_arima import AutoArimaBackend
+    from tseapy.tasks.forecasting.auto_ets import AutoEtsBackend
+    from tseapy.tasks.forecasting.auto_theta import AutoThetaBackend
+    from tseapy.tasks.forecasting.historic_average import HistoricAverageBackend
+    from tseapy.tasks.forecasting.lightgbm_mlforecast import LightGBMMLForecastBackend
+    from tseapy.tasks.forecasting.naive import NaiveBackend
+    from tseapy.tasks.forecasting.seasonal_naive import SeasonalNaiveBackend
+    from tseapy.tasks.forecasting.xgboost_mlforecast import XGBoostMLForecastBackend
+
+    return [
+        ('AutoARIMA', 'use_auto_arima', AutoArimaBackend),
+        ('AutoETS', 'use_auto_ets', AutoEtsBackend),
+        ('AutoTheta', 'use_auto_theta', AutoThetaBackend),
+        ('Naive', 'use_naive', NaiveBackend),
+        ('SeasonalNaive', 'use_seasonal_naive', SeasonalNaiveBackend),
+        ('HistoricAverage', 'use_historic_average', HistoricAverageBackend),
+        ('LightGBM', 'use_lightgbm', LightGBMMLForecastBackend),
+        ('XGBoost', 'use_xgboost', XGBoostMLForecastBackend),
+    ]
+
+
+def select_backends(kwargs, *, minimum: int = 1):
+    """Resolve the user-selected backends from boolean ``use_*`` flags."""
+    selected = []
+    for display_name, flag_name, backend_cls in get_candidate_backends():
+        raw_flag = kwargs.get(flag_name, 'false')
+        if parse_bool(raw_flag, name=flag_name):
+            selected.append((display_name, backend_cls))
+
+    if len(selected) < minimum:
+        noun = 'method' if minimum == 1 else 'methods'
+        raise ValueError(f'Select at least {minimum} forecasting {noun}.')
+    return selected
+
+
+def run_backend(backend_cls, data, feature, horizon, season_length):
+    """Instantiate ``backend_cls`` and run a single forecast.
+
+    ``season_length`` is only forwarded to backends that accept it.
+    """
+    backend = backend_cls()
+    param_names = {p.name for p in backend.parameters}
+    model_kwargs = {'horizon': horizon}
+    if 'season_length' in param_names:
+        model_kwargs['season_length'] = season_length
+    return backend.do_analysis(data=data, feature=feature, **model_kwargs)
+
+
 def future_index(index: pd.Index, horizon: int):
     if horizon < 1:
         raise ValueError("horizon must be at least 1.")

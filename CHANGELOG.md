@@ -6,8 +6,16 @@ The format is inspired by Keep a Changelog.
 
 ## [Unreleased]
 
+### Added
+- Cross-validation backtesting backend (`forecasting/cross-validation-backtest`):
+  rolling-origin (expanding or sliding window) evaluation of multiple forecasting
+  methods, with a per-window error chart, forecasts overlaid on the series for each
+  window, and a leaderboard report that ranks methods (mean MAE/RMSE/MAPE, win count)
+  and auto-selects the recommended model.
+
 ### Changed
-- No unreleased changes yet.
+- Shared forecasting backend selection/run helpers extracted to
+  `tseapy/tasks/forecasting/common.py` and reused by the comparison backend.
 
 ## [1.2.0a0] - 2026-02-09
 
